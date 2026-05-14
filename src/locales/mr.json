@@ -1,0 +1,21 @@
+{
+  "donate": "अन्न दान करा",
+  "dashboard": "डॅशबोर्ड",
+  "logout": "लॉग आउट",
+  "myDonations": "माझे दान",
+  "leaderboard": "लीडरबोर्ड",
+  "rewardPoints": "बक्षीस गुण",
+  "uploadDonation": "दान अपलोड करा",
+  "acceptDonation": "दान स्वीकारा",
+  "markCollected": "गोळा केले",
+  "markCompleted": "पूर्ण झाले",
+  "status": "स्थिती",
+  "location": "स्थान",
+  "quantity": "प्रमाण",
+  "expiryTime": "कालबाह्य वेळ",
+  "foodType": "अन्न प्रकार",
+  "points": "गुण",
+  "badges": "बॅज",
+  "welcome": "RescueBite मध्ये स्वागत",
+  "quickDonate": "जलद दान"
+}

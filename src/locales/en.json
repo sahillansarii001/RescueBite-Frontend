@@ -1,0 +1,21 @@
+{
+  "donate": "Donate Food",
+  "dashboard": "Dashboard",
+  "logout": "Logout",
+  "myDonations": "My Donations",
+  "leaderboard": "Leaderboard",
+  "rewardPoints": "Reward Points",
+  "uploadDonation": "Upload Donation",
+  "acceptDonation": "Accept Donation",
+  "markCollected": "Mark Collected",
+  "markCompleted": "Mark Completed",
+  "status": "Status",
+  "location": "Location",
+  "quantity": "Quantity",
+  "expiryTime": "Expiry Time",
+  "foodType": "Food Type",
+  "points": "Points",
+  "badges": "Badges",
+  "welcome": "Welcome to RescueBite",
+  "quickDonate": "Quick Donate"
+}
