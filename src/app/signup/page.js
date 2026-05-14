@@ -11,31 +11,26 @@ const empty = {
   donorType: 'individual', location: '', address: '', mapLink: '', phone: '', language: 'en',
 }
 
+const inputCls = 'w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none transition text-primary'
+const inputStyle = { backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }
+
 export default function SignupPage() {
   const router = useRouter()
   const [form, setForm] = useState(empty)
   const [loading, setLoading] = useState(false)
+  const [step, setStep] = useState(1)
 
   useEffect(() => {
     if (isLoggedIn()) router.replace('/dashboard')
   }, [router])
 
-  const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
+  const set = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters')
-      return
-    }
-    if (!form.mapLink.startsWith('http')) {
-      toast.error('Google Maps link must be a valid URL starting with http')
-      return
-    }
-    if (form.phone.replace(/\D/g, '').length < 10) {
-      toast.error('Enter a valid phone number (min 10 digits)')
-      return
-    }
+    if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return }
+    if (!form.mapLink.startsWith('http')) { toast.error('Google Maps link must start with http'); return }
+    if (form.phone.replace(/\D/g, '').length < 10) { toast.error('Enter a valid phone number (min 10 digits)'); return }
     setLoading(true)
     try {
       const payload = { ...form }
@@ -51,129 +46,135 @@ export default function SignupPage() {
     }
   }
 
-  const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500'
+  const Field = ({ label, name, type = 'text', placeholder, required = true, children }) => (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5 text-muted">{label}{required ? ' *' : ''}</label>
+      {children || (
+        <input type={type} name={name} value={form[name]} onChange={set} required={required}
+          placeholder={placeholder} className={inputCls} style={inputStyle}
+          onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+          onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+      )}
+    </div>
+  )
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg">
-        <div className="text-center mb-6">
-          <p className="text-3xl">🍃</p>
-          <h1 className="text-2xl font-bold text-green-700 mt-1">Join RescueBite</h1>
-          <p className="text-gray-500 text-sm mt-1">Create your account</p>
+    <div className="min-h-screen flex page-bg">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-5/12 flex-col justify-between p-12 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #052e16 0%, #14532d 50%, #166534 100%)' }}>
+        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.2) 0%, transparent 70%)' }} />
+        <div className="relative z-10 flex items-center gap-2">
+          <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white text-sm">R</div>
+          <span className="font-bold text-xl text-white">RescueBite</span>
         </div>
+        <div className="relative z-10">
+          <h2 className="text-3xl font-extrabold text-white leading-tight mb-4">
+            Start rescuing food today.
+          </h2>
+          <div className="flex flex-col gap-3 mt-6">
+            {[
+              { icon: '✓', text: 'Free to join — no fees ever' },
+              { icon: '✓', text: 'Instant NGO matching' },
+              { icon: '✓', text: 'Earn points and badges' },
+              { icon: '✓', text: 'CSR impact certificates' },
+            ].map(item => (
+              <div key={item.text} className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                  style={{ backgroundColor: 'rgba(34,197,94,0.3)' }}>{item.icon}</div>
+                <span className="text-green-100 text-sm">{item.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="relative z-10 text-green-300 text-xs">© 2024 RescueBite. All rights reserved.</p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-            <input name="name" value={form.name} onChange={handleChange} required
-              className={inputClass} placeholder="Your name" />
+      {/* Right panel */}
+      <div className="flex-1 flex items-start justify-center px-6 py-10 overflow-y-auto" style={{ backgroundColor: 'var(--bg-base)' }}>
+        <div className="w-full max-w-lg">
+          <div className="flex items-center gap-2 mb-6 lg:hidden">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white text-sm"
+              style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>R</div>
+            <span className="font-bold text-lg text-primary">RescueBite</span>
           </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-            <input type="email" name="email" value={form.email} onChange={handleChange} required
-              className={inputClass} placeholder="you@example.com" />
-          </div>
+          <h1 className="text-3xl font-extrabold text-primary mb-1">Create your account</h1>
+          <p className="text-secondary text-sm mb-8">Join the food rescue movement today</p>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password * (min 6 chars)</label>
-            <input type="password" name="password" value={form.password} onChange={handleChange} required minLength={6}
-              className={inputClass} placeholder="••••••••" />
-          </div>
-
-          {/* Role */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-            <select name="role" value={form.role} onChange={handleChange} className={inputClass}>
-              <option value="donor">Donor</option>
-              <option value="ngo">NGO</option>
-            </select>
-          </div>
-
-          {/* Donor type — only for donors */}
-          {form.role === 'donor' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">I am donating as a... *</label>
-              <select name="donorType" value={form.donorType} onChange={handleChange} className={inputClass}>
-                <option value="individual">Individual</option>
-                <option value="restaurant">Restaurant</option>
-                <option value="marriage_hall">Marriage Hall</option>
-                <option value="hotel">Hotel</option>
-                <option value="other">Other</option>
-              </select>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Full Name" name="name" placeholder="Your name" />
+              <Field label="Email" name="email" type="email" placeholder="you@example.com" />
             </div>
-          )}
 
-          {/* Location (city/area) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">City / Area *</label>
-            <input name="location" value={form.location} onChange={handleChange} required
-              className={inputClass} placeholder="e.g. Andheri West, Mumbai" />
-          </div>
+            <Field label="Password (min 6 chars)" name="password" type="password" placeholder="••••••••" />
 
-          {/* Full Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Address *</label>
-            <textarea name="address" value={form.address} onChange={handleChange} rows={2} required
-              className={inputClass}
-              placeholder={form.role === 'ngo'
-                ? 'e.g. 2nd Floor, ABC Building, MG Road, Mumbai 400001'
-                : 'e.g. Flat 4B, Sunrise Apartments, Bandra, Mumbai'} />
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Role">
+                <select name="role" value={form.role} onChange={set} className={inputCls} style={inputStyle}>
+                  <option value="donor">Donor</option>
+                  <option value="ngo">NGO</option>
+                </select>
+              </Field>
+              {form.role === 'donor' && (
+                <Field label="Donor Type">
+                  <select name="donorType" value={form.donorType} onChange={set} className={inputCls} style={inputStyle}>
+                    <option value="individual">Individual</option>
+                    <option value="restaurant">Restaurant</option>
+                    <option value="marriage_hall">Marriage Hall</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="other">Other</option>
+                  </select>
+                </Field>
+              )}
+            </div>
 
-          {/* Google Maps Link */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps Link *</label>
-            <input name="mapLink" value={form.mapLink} onChange={handleChange} required
-              className={inputClass}
-              placeholder="https://maps.google.com/..." />
-            <p className="text-xs text-gray-400 mt-1">
-              📍 Open Google Maps → share your location → copy the link
-            </p>
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="City / Area" name="location" placeholder="e.g. Andheri West, Mumbai" />
+              <Field label="Phone Number" name="phone" type="tel" placeholder="+91 98765 43210" />
+            </div>
 
-          {/* Phone Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-            <input type="tel" name="phone" value={form.phone} onChange={handleChange} required
-              className={inputClass}
-              placeholder="e.g. +91 98765 43210" />
-          </div>
+            <Field label="Full Address" name="address">
+              <textarea name="address" value={form.address} onChange={set} rows={2} required
+                placeholder="e.g. Flat 4B, Sunrise Apartments, Bandra, Mumbai"
+                className={inputCls} style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+            </Field>
 
-          {/* Language */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Language Preference</label>
-            <select name="language" value={form.language} onChange={handleChange} className={inputClass}>
-              <option value="en">English</option>
-              <option value="hi">हिंदी</option>
-              <option value="mr">मराठी</option>
-            </select>
-          </div>
+            <Field label="Google Maps Link" name="mapLink" placeholder="https://maps.google.com/...">
+              <input name="mapLink" value={form.mapLink} onChange={set} required
+                placeholder="https://maps.google.com/..."
+                className={inputCls} style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+              <p className="text-xs mt-1 text-muted">Open Google Maps → share location → copy link</p>
+            </Field>
 
-          <button
-            type="submit" disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                </svg>
-                Creating...
-              </>
-            ) : 'Create Account'}
-          </button>
-        </form>
+            <Field label="Language Preference" required={false}>
+              <select name="language" value={form.language} onChange={set} className={inputCls} style={inputStyle}>
+                <option value="en">English</option>
+                <option value="hi">हिंदी</option>
+                <option value="mr">मराठी</option>
+              </select>
+            </Field>
 
-        <p className="text-center text-sm text-gray-500 mt-5">
-          Already have an account?{' '}
-          <Link href="/login" className="text-green-600 font-medium hover:underline">Sign in</Link>
-        </p>
+            <button type="submit" disabled={loading}
+              className="w-full py-3 rounded-xl text-white font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg mt-2"
+              style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 4px 20px rgba(34,197,94,0.25)' }}>
+              {loading ? (
+                <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Creating account...</>
+              ) : 'Create Account'}
+            </button>
+          </form>
+
+          <p className="text-center text-sm mt-5 text-secondary">
+            Already have an account?{' '}
+            <Link href="/login" className="font-semibold hover:underline" style={{ color: 'var(--accent)' }}>Sign in</Link>
+          </p>
+        </div>
       </div>
     </div>
   )

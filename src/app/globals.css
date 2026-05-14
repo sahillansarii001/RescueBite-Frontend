@@ -1,3 +1,76 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* ── Dark mode (default) ── */
+  :root {
+    --bg-base:     #020617;
+    --bg-surface:  #0f172a;
+    --bg-card:     #1e293b;
+    --bg-hover:    #334155;
+    --border:      rgba(255,255,255,0.07);
+    --border-hover:rgba(255,255,255,0.15);
+    --text-primary:#f1f5f9;
+    --text-secondary:#94a3b8;
+    --text-muted:  #475569;
+    --accent:      #22c55e;
+    --accent-soft: rgba(34,197,94,0.12);
+  }
+
+  /* ── Light mode ── */
+  html:not(.dark) {
+    --bg-base:     #f8fafc;
+    --bg-surface:  #ffffff;
+    --bg-card:     #ffffff;
+    --bg-hover:    #f1f5f9;
+    --border:      rgba(0,0,0,0.08);
+    --border-hover:rgba(0,0,0,0.18);
+    --text-primary:#0f172a;
+    --text-secondary:#475569;
+    --text-muted:  #94a3b8;
+    --accent:      #16a34a;
+    --accent-soft: rgba(22,163,74,0.10);
+  }
+}
+
+@layer utilities {
+  /* Theme-aware utility classes used across all pages */
+  .page-bg       { background-color: var(--bg-base); }
+  .surface-bg    { background-color: var(--bg-surface); }
+  .card-bg       { background-color: var(--bg-card); }
+  .card-hover    { background-color: var(--bg-hover); }
+  .border-theme  { border-color: var(--border); }
+  .text-primary  { color: var(--text-primary); }
+  .text-secondary{ color: var(--text-secondary); }
+  .text-muted    { color: var(--text-muted); }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #22c55e, #d946ef);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-warm {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-glow-green {
+    background: radial-gradient(ellipse at 20% 50%, rgba(34,197,94,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(217,70,239,0.10) 0%, transparent 60%);
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}

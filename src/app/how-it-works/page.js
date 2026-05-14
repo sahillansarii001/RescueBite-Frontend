@@ -2,198 +2,166 @@
 import Link from 'next/link'
 
 const workflow = [
-  { step: '01', icon: '📸', title: 'Donor Uploads Food', desc: 'Donor fills in food name, quantity, type, expiry time, location, and an optional photo. Takes under 2 minutes.' },
-  { step: '02', icon: '🔔', title: 'NGOs View Nearby Donations', desc: 'Verified NGOs in the area are instantly notified and can browse available donations on their dashboard.' },
-  { step: '03', icon: '✅', title: 'NGO Accepts Donation', desc: 'An NGO accepts the donation, locking it in and notifying the donor that pickup is confirmed.' },
-  { step: '04', icon: '🚗', title: 'Food Collected', desc: 'The NGO team arrives at the donor\'s location and collects the food. Status updates in real time.' },
-  { step: '05', icon: '📊', title: 'Analytics Updated', desc: 'Impact metrics — meals saved, points earned, badges unlocked — are updated automatically for all parties.' },
+  { num: '01', icon: '🔐', title: 'Create Your Account', desc: 'Sign up as a Donor, NGO, or Restaurant in under 2 minutes. NGOs go through a manual review for quality assurance.' },
+  { num: '02', icon: '📸', title: 'Post Surplus Food', desc: 'Fill in food name, quantity, type, expiry time, pickup location, and an optional photo.' },
+  { num: '03', icon: '🔔', title: 'NGOs Get Notified', desc: 'All verified NGOs within the pickup radius are instantly notified and can accept from their dashboard.' },
+  { num: '04', icon: '✅', title: 'Donation Accepted', desc: 'An NGO accepts the donation. The donor is notified immediately and pickup is confirmed.' },
+  { num: '05', icon: '🚗', title: 'Food Collected', desc: 'The NGO team arrives at the donor location and collects the food. Status updates in real time.' },
+  { num: '06', icon: '📊', title: 'Impact Recorded', desc: 'Meals saved, points earned, and badges unlocked are updated automatically on the leaderboard.' },
 ]
-
 const roles = [
-  {
-    icon: '🏠',
-    title: 'Donor Role',
-    color: 'border-green-200 bg-green-50',
-    badge: 'bg-green-100 text-green-700',
-    points: [
-      'Register and create a donor profile',
-      'Upload surplus food with details and photo',
-      'Track donation status in real time',
-      'Earn points and badges for every donation',
-      'View personal impact on the leaderboard',
-    ],
-  },
-  {
-    icon: '🤝',
-    title: 'NGO Role',
-    color: 'border-blue-200 bg-blue-50',
-    badge: 'bg-blue-100 text-blue-700',
-    points: [
-      'Register and get verified by the RescueBite team',
-      'Browse available donations nearby',
-      'Accept and collect donations',
-      'Mark donations as collected and completed',
-      'View analytics on food received',
-    ],
-  },
-  {
-    icon: '🍽️',
-    title: 'Restaurant Role',
-    color: 'border-orange-200 bg-orange-50',
-    badge: 'bg-orange-100 text-orange-700',
-    points: [
-      'Register as a restaurant donor',
-      'Schedule recurring daily surplus donations',
-      'Get matched with the nearest NGO automatically',
-      'Track all past and active donations',
-      'Receive impact certificates for CSR reporting',
-    ],
-  },
-  {
-    icon: '🛡️',
-    title: 'Admin Role',
-    color: 'border-purple-200 bg-purple-50',
-    badge: 'bg-purple-100 text-purple-700',
-    points: [
-      'Full platform visibility and control',
-      'Manage and verify all users and NGOs',
-      'View platform-wide analytics and trends',
-      'Moderate donations and resolve disputes',
-      'Manage user roles, points, and badges',
-    ],
-  },
+  { icon: '🏠', title: 'Donor', accent: '#22c55e', points: ['Register and create a donor profile', 'Upload surplus food with details and photo', 'Track donation status in real time', 'Earn points and badges for every donation', 'Climb the leaderboard and unlock rewards'] },
+  { icon: '🤝', title: 'NGO', accent: '#3b82f6', points: ['Register and get verified by the RescueBite team', 'Browse available donations nearby on the dashboard', 'Accept and collect donations with one click', 'Mark donations as collected and completed', 'View analytics on food received and distributed'] },
+  { icon: '🍽️', title: 'Restaurant', accent: '#f59e0b', points: ['Register as a restaurant or hotel donor', 'Schedule recurring daily surplus donations', 'Get auto-matched with the nearest NGO', 'Track all past and active donations', 'Receive impact certificates for CSR reporting'] },
+  { icon: '🛡️', title: 'Admin', accent: '#d946ef', points: ['Full platform visibility and control', 'Manage and verify all users and NGOs', 'View platform-wide analytics and trends', 'Moderate donations and resolve disputes', 'Manage user roles, points, and badges'] },
+]
+const faqs = [
+  { q: 'Is there a minimum quantity for donation?', a: 'No minimum at all. Even a single home-cooked meal counts and is welcome on the platform.' },
+  { q: 'How quickly does food get picked up?', a: 'NGOs are notified instantly. Most pickups happen within 1-3 hours of posting.' },
+  { q: 'How are NGOs verified?', a: 'Every NGO goes through a manual verification process by our team before they can accept donations.' },
+  { q: 'Can I schedule recurring donations?', a: 'Yes. Restaurants and hotels can set up recurring donation schedules so the process is fully automated.' },
+  { q: 'What types of food can be donated?', a: 'Cooked food, raw produce, and packaged goods are all accepted. Food must be safe for consumption.' },
+  { q: 'Is the platform free to use?', a: 'Completely free for donors and NGOs. No fees, no commissions.' },
+  { q: 'What if an NGO does not pick up?', a: 'If a donation is not accepted within 2 hours, it is re-broadcast to a wider radius of NGOs automatically.' },
+  { q: 'Can I donate food from outside India?', a: 'Currently RescueBite operates only in India. We plan to expand internationally in 2026.' },
+]
+const benefits = [
+  { title: 'Earn Points', desc: 'Every donation earns you points that unlock badges and leaderboard rankings.' },
+  { title: 'Unlock Badges', desc: 'Silver, Gold, and Hunger Hero badges for milestone donors.' },
+  { title: 'CSR Certificates', desc: 'Restaurants and corporates receive official impact certificates for CSR reporting.' },
+  { title: 'Impact Dashboard', desc: 'See exactly how many meals you have rescued and communities you have helped.' },
 ]
 
-const flowSteps = [
-  { label: 'Register / Login', icon: '🔐' },
-  { label: 'Upload Food', icon: '📦' },
-  { label: 'NGO Accepts', icon: '✅' },
-  { label: 'Food Distributed', icon: '🚗' },
-  { label: 'Impact Updated', icon: '📊' },
-]
+const S = ({ children, alt }) => (
+  <section className="py-24 px-6" style={{ backgroundColor: alt ? 'var(--bg-surface)' : 'var(--bg-base)' }}>
+    {children}
+  </section>
+)
 
 export default function HowItWorksPage() {
   return (
-    <main className="overflow-x-hidden">
+    <main className="overflow-x-hidden page-bg">
 
-      {/* ── Hero ── */}
-      <section className="bg-gradient-to-br from-green-700 via-green-800 to-green-900 text-white py-24 px-6 text-center relative">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_70%,white,transparent_60%)]" />
-        <span className="inline-block bg-orange-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-wide uppercase">
-          Simple. Fast. Impactful.
-        </span>
-        <h1 className="text-4xl md:text-5xl font-extrabold max-w-2xl mx-auto leading-tight">
-          How RescueBite Works
-        </h1>
-        <p className="mt-5 text-green-100 text-lg max-w-xl mx-auto leading-relaxed">
-          From surplus food to a rescued meal — our platform makes the entire process seamless for donors, NGOs, and communities.
-        </p>
+      <section className="relative py-32 px-6 text-center overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--bg-base) 0%, #0d2818 50%, var(--bg-base) 100%)' }}>
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%)' }} />
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <span className="inline-flex items-center gap-2 border text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase" style={{ backgroundColor: 'var(--accent-soft)', borderColor: 'var(--accent)', color: 'var(--accent)' }}>Simple. Fast. Impactful.</span>
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-primary">How <span className="text-gradient">RescueBite</span> Works</h1>
+          <p className="mt-6 text-lg max-w-xl mx-auto leading-relaxed text-secondary">From surplus food to a rescued meal — our platform makes the entire process seamless for everyone involved.</p>
+        </div>
       </section>
 
-      {/* ── Workflow Cards ── */}
-      <section className="py-20 px-6 max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-green-600 font-semibold text-sm uppercase tracking-wide">Step by Step</span>
-          <h2 className="text-3xl font-extrabold text-gray-900 mt-2">The Donation Journey</h2>
-        </div>
-        <div className="flex flex-col gap-6">
-          {workflow.map((w, i) => (
-            <div key={w.step} className="flex gap-6 items-start bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
-              <div className="shrink-0 w-14 h-14 bg-green-100 text-green-700 font-extrabold text-lg rounded-2xl flex items-center justify-center">
-                {w.step}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">{w.icon}</span>
-                  <h3 className="font-bold text-gray-900 text-base">{w.title}</h3>
+      <S>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Step by Step</span>
+            <h2 className="text-4xl font-extrabold mt-3 text-primary">The Donation Journey</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {workflow.map((w) => (
+              <div key={w.num} className="flex gap-5 p-6 rounded-2xl border transition hover:-translate-y-0.5" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-extrabold text-sm shrink-0 shadow-lg" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 4px 16px rgba(34,197,94,0.2)' }}>{w.num}</div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1"><span className="text-lg">{w.icon}</span><h3 className="font-bold text-sm text-primary">{w.title}</h3></div>
+                  <p className="text-sm leading-relaxed text-secondary">{w.desc}</p>
                 </div>
-                <p className="text-gray-500 text-sm leading-relaxed">{w.desc}</p>
               </div>
-              {i < workflow.length - 1 && (
-                <div className="hidden md:flex shrink-0 items-center text-green-300 text-2xl self-center">↓</div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </section>
+      </S>
 
-      {/* ── System Flow Diagram ── */}
-      <section className="bg-gray-50 py-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <span className="text-green-600 font-semibold text-sm uppercase tracking-wide">System Flow</span>
-            <h2 className="text-3xl font-extrabold text-gray-900 mt-2">Platform Flow Diagram</h2>
+      <S alt>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>System Flow</span>
+            <h2 className="text-4xl font-extrabold mt-3 text-primary">Platform Flow Diagram</h2>
           </div>
           <div className="flex flex-wrap justify-center items-center gap-3">
-            {flowSteps.map((f, i) => (
+            {[{icon:'🔐',label:'Register'},{icon:'📦',label:'Upload Food'},{icon:'✅',label:'NGO Accepts'},{icon:'🚗',label:'Collected'},{icon:'📊',label:'Impact Updated'}].map((f, i, arr) => (
               <div key={f.label} className="flex items-center gap-3">
-                <div className="bg-white rounded-2xl border-2 border-green-200 px-6 py-4 text-center shadow-sm min-w-[120px]">
+                <div className="rounded-2xl px-6 py-4 text-center min-w-[110px] border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
                   <span className="text-2xl block">{f.icon}</span>
-                  <p className="text-xs font-semibold text-gray-700 mt-2">{f.label}</p>
+                  <p className="text-xs font-semibold mt-2 text-secondary">{f.label}</p>
                 </div>
-                {i < flowSteps.length - 1 && (
-                  <span className="text-green-400 font-bold text-xl hidden sm:block">→</span>
-                )}
+                {i < arr.length - 1 && <span className="font-bold text-xl hidden sm:block" style={{ color: 'var(--accent)' }}>→</span>}
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </S>
 
-      {/* ── Role Explanation ── */}
-      <section className="py-20 px-6 max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-green-600 font-semibold text-sm uppercase tracking-wide">Roles</span>
-          <h2 className="text-3xl font-extrabold text-gray-900 mt-2">Who Does What?</h2>
-          <p className="text-gray-500 mt-3 max-w-xl mx-auto">Every user type has a clear, purposeful role in the food rescue ecosystem.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {roles.map((r) => (
-            <div key={r.title} className={`rounded-2xl border-2 p-6 ${r.color} hover:shadow-md transition`}>
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-3xl">{r.icon}</span>
-                <span className={`text-sm font-bold px-3 py-1 rounded-full ${r.badge}`}>{r.title}</span>
+      <S>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Roles</span>
+            <h2 className="text-4xl font-extrabold mt-3 text-primary">Who Does What?</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {roles.map((r) => (
+              <div key={r.title} className="p-6 rounded-2xl border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="text-2xl">{r.icon}</span>
+                  <span className="text-sm font-bold px-3 py-1 rounded-full border" style={{ color: r.accent, backgroundColor: `${r.accent}15`, borderColor: `${r.accent}30` }}>{r.title}</span>
+                </div>
+                <ul className="flex flex-col gap-2.5">
+                  {r.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2.5 text-sm text-secondary">
+                      <span className="mt-0.5 shrink-0 font-bold" style={{ color: 'var(--accent)' }}>✓</span>{p}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="flex flex-col gap-2">
-                {r.points.map((p) => (
-                  <li key={p} className="flex items-start gap-2 text-sm text-gray-700">
-                    <span className="text-green-500 mt-0.5 shrink-0">✓</span>
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="bg-gradient-to-r from-green-700 to-green-800 text-white py-16 px-6 text-center">
-        <h2 className="text-3xl font-extrabold mb-4">Ready to get started?</h2>
-        <p className="text-green-200 mb-8 max-w-md mx-auto">Sign up in seconds and start making an impact today.</p>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Link href="/signup"
-            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-xl transition shadow">
-            Start Donating
-          </Link>
-          <Link href="/signup"
-            className="border-2 border-white text-white hover:bg-white hover:text-green-800 font-semibold px-8 py-3 rounded-xl transition">
-            Register as NGO
-          </Link>
-        </div>
-      </section>
-
-      <footer className="bg-green-900 text-green-200 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-          <p className="font-semibold text-white">🍃 RescueBite</p>
-          <div className="flex flex-wrap gap-6 justify-center">
-            {[['Home', '/'], ['About', '/about'], ['How It Works', '/how-it-works'], ['Impact', '/impact'], ['Contact', '/contact']].map(([l, h]) => (
-              <Link key={h} href={h} className="hover:text-white transition">{l}</Link>
             ))}
           </div>
-          <p className="text-green-400 text-xs">© 2024 RescueBite</p>
         </div>
-      </footer>
+      </S>
+
+      <S alt>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="font-semibold text-sm uppercase tracking-widest text-amber-500">Rewards</span>
+            <h2 className="text-4xl font-extrabold mt-3 text-primary">Benefits of Donating</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {benefits.map((b) => (
+              <div key={b.title} className="p-6 rounded-2xl border text-center transition hover:-translate-y-1" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4" style={{ backgroundColor: 'rgba(245,158,11,0.1)' }}>⭐</div>
+                <h3 className="font-bold mb-2 text-primary">{b.title}</h3>
+                <p className="text-sm leading-relaxed text-secondary">{b.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </S>
+
+      <S>
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>FAQ</span>
+            <h2 className="text-4xl font-extrabold mt-3 text-primary">Common Questions</h2>
+          </div>
+          <div className="flex flex-col gap-4">
+            {faqs.map((f) => (
+              <div key={f.q} className="p-6 rounded-2xl border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+                <p className="font-semibold text-sm mb-2 text-primary">{f.q}</p>
+                <p className="text-sm leading-relaxed text-secondary">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </S>
+
+      <S alt>
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-4xl font-extrabold mb-5 text-primary">Ready to get started?</h2>
+          <p className="mb-10 text-secondary">Sign up in seconds and start making an impact today.</p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/signup" className="px-8 py-4 rounded-xl text-white font-semibold transition shadow-xl" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 8px 32px rgba(34,197,94,0.25)' }}>Start Donating</Link>
+            <Link href="/signup" className="px-8 py-4 rounded-xl font-semibold transition border" style={{ borderColor: 'var(--border-hover)', color: 'var(--text-primary)' }}>Register as NGO</Link>
+          </div>
+        </div>
+      </S>
     </main>
   )
 }

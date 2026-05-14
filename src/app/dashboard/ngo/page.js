@@ -4,17 +4,24 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { getUser, isLoggedIn } from '../../../utils/auth'
 import api from '../../../utils/api'
+import DashboardLayout from '../../../components/DashboardLayout'
 import DonationCard from '../../../components/DonationCard'
 import StatusBadge from '../../../components/StatusBadge'
+
+const StatCard = ({ label, value, color }) => (
+  <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+    <p className="text-xs font-semibold uppercase tracking-widest text-muted mb-2">{label}</p>
+    <p className="text-3xl font-extrabold" style={{ color }}>{value}</p>
+  </div>
+)
 
 export default function NgoDashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
-  const [availableDonations, setAvailableDonations] = useState([])
-  const [myAccepted, setMyAccepted] = useState([])
-  const [activeTab, setActiveTab] = useState('available')
+  const [available, setAvailable] = useState([])
+  const [accepted, setAccepted] = useState([])
+  const [activeTab, setActiveTab] = useState('overview')
   const [loading, setLoading] = useState(false)
-  // Track which donation IDs are currently being acted on — prevents double-clicks
   const [actingOn, setActingOn] = useState(new Set())
   const userIdRef = useRef(null)
 
@@ -34,57 +41,71 @@ export default function NgoDashboard() {
         api.get('/donations?status=pending'),
         api.get(`/donations?acceptedBy=${userId}`),
       ])
-      setAvailableDonations(pendingRes.data.donations || [])
-      setMyAccepted(acceptedRes.data.donations || [])
-    } catch {
-      toast.error('Failed to load donations')
-    } finally {
-      setLoading(false)
-    }
+      setAvailable(pendingRes.data.donations || [])
+      setAccepted(acceptedRes.data.donations || [])
+    } catch { toast.error('Failed to load donations') }
+    finally { setLoading(false) }
   }
 
   const acceptDonation = async (id) => {
-    // Prevent double-click
     if (actingOn.has(id)) return
-    setActingOn((prev) => new Set([...prev, id]))
+    setActingOn(p => new Set([...p, id]))
     try {
       await api.put(`/donations/${id}`, { status: 'accepted' })
       toast.success('Donation accepted!')
-      // Optimistically remove from available immediately
-      setAvailableDonations((prev) => prev.filter((d) => d._id !== id))
-      // Re-fetch accepted list with populated data
-      const acceptedRes = await api.get(`/donations?acceptedBy=${userIdRef.current}`)
-      setMyAccepted(acceptedRes.data.donations || [])
+      setAvailable(p => p.filter(d => d._id !== id))
+      const res = await api.get(`/donations?acceptedBy=${userIdRef.current}`)
+      setAccepted(res.data.donations || [])
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to accept')
-      // On failure, restore by re-fetching available too
-      const pendingRes = await api.get('/donations?status=pending')
-      setAvailableDonations(pendingRes.data.donations || [])
+      const res = await api.get('/donations?status=pending')
+      setAvailable(res.data.donations || [])
     } finally {
-      setActingOn((prev) => { const s = new Set(prev); s.delete(id); return s })
+      setActingOn(p => { const s = new Set(p); s.delete(id); return s })
     }
   }
 
   const updateStatus = async (id, newStatus) => {
-    // Prevent double-click
     if (actingOn.has(id)) return
-    setActingOn((prev) => new Set([...prev, id]))
+    setActingOn(p => new Set([...p, id]))
     try {
       await api.put(`/donations/${id}`, { status: newStatus })
       toast.success('Status updated!')
-      // Re-fetch to get fully populated donation data
-      const acceptedRes = await api.get(`/donations?acceptedBy=${userIdRef.current}`)
-      setMyAccepted(acceptedRes.data.donations || [])
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update status')
-    } finally {
-      setActingOn((prev) => { const s = new Set(prev); s.delete(id); return s })
-    }
+      const res = await api.get(`/donations?acceptedBy=${userIdRef.current}`)
+      setAccepted(res.data.donations || [])
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed to update') }
+    finally { setActingOn(p => { const s = new Set(p); s.delete(id); return s }) }
   }
 
+  const completed = accepted.filter(d => d.status === 'completed').length
+  const inProgress = accepted.filter(d => d.status !== 'completed').length
+
+  const navItems = [
+    {
+      id: 'overview', label: 'Overview', icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2" /></svg>
+      )
+    },
+    {
+      id: 'available', label: 'Available', icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+      )
+    },
+    {
+      id: 'accepted', label: 'My Accepted', icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+      )
+    },
+    {
+      id: 'history', label: 'Completed', icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      )
+    },
+  ]
+
   if (!user) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <svg className="animate-spin h-8 w-8 text-green-600" viewBox="0 0 24 24" fill="none">
+    <div className="min-h-screen flex items-center justify-center page-bg">
+      <svg className="animate-spin h-8 w-8" style={{ color: 'var(--accent)' }} viewBox="0 0 24 24" fill="none">
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
       </svg>
@@ -92,110 +113,129 @@ export default function NgoDashboard() {
   )
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">NGO Dashboard 🤝</h1>
-        <p className="text-gray-500 text-sm mt-1">Welcome, {user.name}</p>
-      </div>
+    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={setActiveTab}
+      title={`Welcome, ${user.name}`} subtitle="NGO Dashboard">
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        {[['available', 'Available Donations'], ['accepted', 'My Accepted']].map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setActiveTab(key)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              activeTab === key ? 'bg-green-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-green-400'
-            }`}
-          >
-            {label}
-            {key === 'available' && availableDonations.length > 0 && (
-              <span className="ml-2 bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">
-                {availableDonations.length}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Overview */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard label="Available Now" value={available.length} color="#3b82f6" />
+            <StatCard label="In Progress" value={inProgress} color="#f59e0b" />
+            <StatCard label="Completed" value={completed} color="#22c55e" />
+            <StatCard label="Total Accepted" value={accepted.length} color="#d946ef" />
+          </div>
 
-      {/* TAB 1 — Available */}
+          {/* Recent available */}
+          <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-primary">Latest Available Donations</p>
+              <button onClick={() => setActiveTab('available')} className="text-xs font-medium hover:underline" style={{ color: 'var(--accent)' }}>
+                View all →
+              </button>
+            </div>
+            {available.slice(0, 3).length === 0 ? (
+              <p className="text-sm text-muted text-center py-4">No pending donations right now</p>
+            ) : available.slice(0, 3).map(d => (
+              <div key={d._id} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
+                <div>
+                  <p className="text-sm font-medium text-primary">{d.foodName}</p>
+                  <p className="text-xs text-muted">{d.quantity} · {d.location}</p>
+                </div>
+                <button onClick={() => acceptDonation(d._id)} disabled={actingOn.has(d._id)}
+                  className="text-xs px-3 py-1.5 rounded-lg text-white font-medium transition disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+                  {actingOn.has(d._id) ? '...' : 'Accept'}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* In-progress */}
+          <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-primary">In Progress</p>
+              <button onClick={() => setActiveTab('accepted')} className="text-xs font-medium hover:underline" style={{ color: 'var(--accent)' }}>View all →</button>
+            </div>
+            {accepted.filter(d => d.status !== 'completed').slice(0, 3).length === 0 ? (
+              <p className="text-sm text-muted text-center py-4">Nothing in progress</p>
+            ) : accepted.filter(d => d.status !== 'completed').slice(0, 3).map(d => (
+              <div key={d._id} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
+                <div>
+                  <p className="text-sm font-medium text-primary">{d.foodName}</p>
+                  <p className="text-xs text-muted">{d.quantity}</p>
+                </div>
+                <StatusBadge status={d.status} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Available donations */}
       {activeTab === 'available' && (
         loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => <div key={i} className="h-64 bg-gray-200 rounded-2xl animate-pulse" />)}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => <div key={i} className="h-64 rounded-2xl animate-pulse" style={{ backgroundColor: 'var(--bg-card)' }} />)}
           </div>
-        ) : availableDonations.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
+        ) : available.length === 0 ? (
+          <div className="text-center py-20 text-muted">
             <p className="text-4xl mb-3">📭</p>
-            <p>No pending donations available right now</p>
+            <p className="text-sm">No pending donations available right now</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availableDonations.map((d) => (
-              <DonationCard
-                key={d._id}
-                donation={d}
-                showAction={true}
+            {available.map(d => (
+              <DonationCard key={d._id} donation={d} showAction
                 actionLabel={actingOn.has(d._id) ? 'Accepting...' : 'Accept Donation'}
                 actionDisabled={actingOn.has(d._id)}
-                onAction={acceptDonation}
-              />
+                onAction={acceptDonation} />
             ))}
           </div>
         )
       )}
 
-      {/* TAB 2 — My Accepted */}
+      {/* Accepted / in-progress */}
       {activeTab === 'accepted' && (
-        myAccepted.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
+        accepted.filter(d => d.status !== 'completed').length === 0 ? (
+          <div className="text-center py-20 text-muted">
             <p className="text-4xl mb-3">📋</p>
-            <p>You haven&apos;t accepted any donations yet</p>
+            <p className="text-sm">No active donations right now</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {myAccepted.map((d) => {
-              const isBusy = actingOn.has(d._id)
+            {accepted.filter(d => d.status !== 'completed').map(d => {
+              const busy = actingOn.has(d._id)
               return (
-                <div key={d._id} className="bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 flex flex-col gap-3">
-                  <div className="w-full h-36 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                    {d.image ? (
-                      <img src={d.image} alt={d.foodName} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-4xl">🍱</span>
-                    )}
+                <div key={d._id} className="rounded-2xl border overflow-hidden transition hover:-translate-y-0.5"
+                  style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+                  <div className="w-full h-36 flex items-center justify-center" style={{ backgroundColor: 'var(--bg-hover)' }}>
+                    {d.image
+                      ? <img src={d.image} alt={d.foodName} className="w-full h-full object-cover" />
+                      : <span className="text-4xl">🍱</span>}
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-gray-900">{d.foodName}</h3>
-                    <p className="text-sm text-gray-500">{d.quantity} • {d.location}</p>
-                    <p className="text-xs text-gray-400">⏰ {d.expiryTime ? new Date(d.expiryTime).toLocaleString() : '—'}</p>
-                    {d.donorId?.name && (
-                      <p className="text-xs text-gray-400">👤 {d.donorId.name}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between mt-auto">
-                    <StatusBadge status={d.status} />
-                    {d.status === 'accepted' && (
-                      <button
-                        onClick={() => updateStatus(d._id, 'collected')}
-                        disabled={isBusy}
-                        className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs px-3 py-1.5 rounded-lg transition"
-                      >
-                        {isBusy ? 'Updating...' : 'Mark Collected'}
-                      </button>
-                    )}
-                    {d.status === 'collected' && (
-                      <button
-                        onClick={() => updateStatus(d._id, 'completed')}
-                        disabled={isBusy}
-                        className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs px-3 py-1.5 rounded-lg transition"
-                      >
-                        {isBusy ? 'Updating...' : 'Mark Completed'}
-                      </button>
-                    )}
-                    {d.status === 'completed' && (
-                      <span className="text-xs text-green-600 font-semibold">✓ Completed</span>
-                    )}
+                  <div className="p-4 space-y-2">
+                    <h3 className="font-bold text-primary">{d.foodName}</h3>
+                    <p className="text-sm text-secondary">{d.quantity} · {d.location}</p>
+                    <p className="text-xs text-muted">Expires: {d.expiryTime ? new Date(d.expiryTime).toLocaleString() : '—'}</p>
+                    {d.donorId?.name && <p className="text-xs text-muted">Donor: {d.donorId.name}</p>}
+                    <div className="flex items-center justify-between pt-2">
+                      <StatusBadge status={d.status} />
+                      {d.status === 'accepted' && (
+                        <button onClick={() => updateStatus(d._id, 'collected')} disabled={busy}
+                          className="text-xs px-3 py-1.5 rounded-lg text-white font-medium transition disabled:opacity-50"
+                          style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                          {busy ? '...' : 'Mark Collected'}
+                        </button>
+                      )}
+                      {d.status === 'collected' && (
+                        <button onClick={() => updateStatus(d._id, 'completed')} disabled={busy}
+                          className="text-xs px-3 py-1.5 rounded-lg text-white font-medium transition disabled:opacity-50"
+                          style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+                          {busy ? '...' : 'Mark Completed'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )
@@ -203,6 +243,30 @@ export default function NgoDashboard() {
           </div>
         )
       )}
-    </div>
+
+      {/* Completed history */}
+      {activeTab === 'history' && (
+        accepted.filter(d => d.status === 'completed').length === 0 ? (
+          <div className="text-center py-20 text-muted">
+            <p className="text-4xl mb-3">✅</p>
+            <p className="text-sm">No completed donations yet</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {accepted.filter(d => d.status === 'completed').map(d => (
+              <div key={d._id} className="rounded-2xl border p-4 space-y-2"
+                style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-primary text-sm">{d.foodName}</h3>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e' }}>Completed</span>
+                </div>
+                <p className="text-xs text-secondary">{d.quantity} · {d.location}</p>
+                {d.donorId?.name && <p className="text-xs text-muted">Donor: {d.donorId.name}</p>}
+              </div>
+            ))}
+          </div>
+        )
+      )}
+    </DashboardLayout>
   )
 }

@@ -6,33 +6,41 @@ import { getUser, isLoggedIn } from '../../utils/auth'
 import api from '../../utils/api'
 import AnalyticsCharts from '../../components/AnalyticsCharts'
 import DonationTable from '../../components/DonationTable'
-import ProtectedRoute from '../../components/ProtectedRoute'
+import DashboardLayout from '../../components/DashboardLayout'
 
 const STATUS_FILTERS = ['all', 'pending', 'accepted', 'collected', 'completed']
 const ROLE_FILTERS = ['all', 'donor', 'ngo', 'admin']
+const emptyUser = { name: '', email: '', password: '', role: 'donor', donorType: 'individual', location: '', address: '', mapLink: '', phone: '', language: 'en' }
 
-const roleBadge = (role) => {
-  if (role === 'admin') return 'bg-purple-100 text-purple-700'
-  if (role === 'ngo') return 'bg-blue-100 text-blue-700'
-  return 'bg-green-100 text-green-700'
+const roleColor = (role) => {
+  if (role === 'admin') return { bg: 'rgba(217,70,239,0.12)', text: '#d946ef' }
+  if (role === 'ngo') return { bg: 'rgba(59,130,246,0.12)', text: '#3b82f6' }
+  return { bg: 'rgba(34,197,94,0.12)', text: '#22c55e' }
 }
 
-const emptyUser = { name: '', email: '', password: '', role: 'donor', donorType: 'individual', location: '', address: '', mapLink: '', phone: '', language: 'en' }
+const StatCard = ({ label, value, color, icon }) => (
+  <div className="p-5 rounded-2xl border flex items-center gap-4" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: `${color}20` }}>{icon}</div>
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
+      <p className="text-2xl font-extrabold mt-0.5" style={{ color }}>{value}</p>
+    </div>
+  </div>
+)
 
 export default function AdminPage() {
   const router = useRouter()
+  const [user, setUser] = useState(null)
   const [analytics, setAnalytics] = useState(null)
   const [users, setUsers] = useState([])
   const [donations, setDonations] = useState([])
-  const [activeTab, setActiveTab] = useState('analytics')
+  const [activeTab, setActiveTab] = useState('overview')
   const [loading, setLoading] = useState(true)
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [deletingIds, setDeletingIds] = useState(new Set())
   const [actingUserIds, setActingUserIds] = useState(new Set())
   const [searchQuery, setSearchQuery] = useState('')
-
-  // Modals
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
@@ -48,51 +56,42 @@ export default function AdminPage() {
     if (!isLoggedIn()) { router.push('/login'); return }
     const u = getUser()
     if (!u || u.role !== 'admin') { router.push('/dashboard'); return }
+    setUser(u)
     fetchAll()
   }, [router])
 
   const fetchAll = async () => {
     setLoading(true)
     try {
-      const [analyticsRes, usersRes, donationsRes] = await Promise.all([
-        api.get('/analytics'),
-        api.get('/users/all'),
-        api.get('/donations'),
-      ])
-      setAnalytics(analyticsRes.data.analytics)
-      setUsers(usersRes.data.users || [])
-      setDonations(donationsRes.data.donations || [])
+      const [aRes, uRes, dRes] = await Promise.all([api.get('/analytics'), api.get('/users/all'), api.get('/donations')])
+      setAnalytics(aRes.data.analytics)
+      setUsers(uRes.data.users || [])
+      setDonations(dRes.data.donations || [])
     } catch { toast.error('Failed to load admin data') }
     finally { setLoading(false) }
   }
 
-  // ── Donation actions ──────────────────────────────────────
   const deleteDonation = async (id) => {
     if (deletingIds.has(id)) return
     if (!confirm('Delete this donation?')) return
-    setDeletingIds((prev) => new Set([...prev, id]))
+    setDeletingIds(p => new Set([...p, id]))
     try {
       await api.delete(`/donations/${id}`)
       toast.success('Donation deleted')
-      setDonations((prev) => prev.filter((d) => d._id !== id))
+      setDonations(p => p.filter(d => d._id !== id))
     } catch (err) { toast.error(err.response?.data?.message || 'Delete failed') }
-    finally { setDeletingIds((prev) => { const s = new Set(prev); s.delete(id); return s }) }
+    finally { setDeletingIds(p => { const s = new Set(p); s.delete(id); return s }) }
   }
 
-  // ── User actions ──────────────────────────────────────────
   const openCreate = () => { setCreateForm(emptyUser); setShowCreateModal(true) }
-
   const handleCreate = async (e) => {
-    e.preventDefault()
-    setModalLoading(true)
+    e.preventDefault(); setModalLoading(true)
     try {
       const payload = { ...createForm }
       if (payload.role !== 'donor') delete payload.donorType
       const res = await api.post('/users/admin/create', payload)
-      setUsers((prev) => [res.data.user, ...prev])
-      toast.success('User created!')
-      setShowCreateModal(false)
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed to create user') }
+      setUsers(p => [res.data.user, ...p]); toast.success('User created!'); setShowCreateModal(false)
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
     finally { setModalLoading(false) }
   }
 
@@ -101,193 +100,176 @@ export default function AdminPage() {
     setEditForm({ name: u.name, email: u.email, role: u.role, points: u.points, location: u.location || '', address: u.address || '', phone: u.phone || '', donorType: u.donorType || 'individual' })
     setShowEditModal(true)
   }
-
   const handleEdit = async (e) => {
-    e.preventDefault()
-    setModalLoading(true)
+    e.preventDefault(); setModalLoading(true)
     try {
       const res = await api.put(`/users/admin/${selectedUser._id}`, editForm)
-      setUsers((prev) => prev.map((u) => u._id === selectedUser._id ? res.data.user : u))
-      toast.success('User updated!')
-      setShowEditModal(false)
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed to update') }
+      setUsers(p => p.map(u => u._id === selectedUser._id ? res.data.user : u)); toast.success('Updated!'); setShowEditModal(false)
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
     finally { setModalLoading(false) }
   }
 
   const openReset = (u) => { setSelectedUser(u); setNewPassword(''); setShowResetModal(true) }
-
   const handleResetPassword = async (e) => {
-    e.preventDefault()
-    setModalLoading(true)
+    e.preventDefault(); setModalLoading(true)
     try {
       await api.put(`/users/admin/${selectedUser._id}/reset-password`, { newPassword })
-      toast.success('Password reset!')
-      setShowResetModal(false)
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed to reset') }
+      toast.success('Password reset!'); setShowResetModal(false)
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
     finally { setModalLoading(false) }
   }
 
   const openDetail = async (u) => {
-    setSelectedUser(u)
-    setShowDetailModal(true)
-    setUserDetail(null)
-    try {
-      const res = await api.get(`/users/admin/${u._id}`)
-      setUserDetail(res.data)
-    } catch { toast.error('Failed to load user details') }
+    setSelectedUser(u); setShowDetailModal(true); setUserDetail(null)
+    try { const res = await api.get(`/users/admin/${u._id}`); setUserDetail(res.data) }
+    catch { toast.error('Failed to load user details') }
   }
-
   const handleDeleteUser = async (id) => {
     if (actingUserIds.has(id)) return
     if (!confirm('Delete this user and ALL their donations? This cannot be undone.')) return
-    setActingUserIds((prev) => new Set([...prev, id]))
+    setActingUserIds(p => new Set([...p, id]))
     try {
       await api.delete(`/users/admin/${id}`)
-      setUsers((prev) => prev.filter((u) => u._id !== id))
-      toast.success('User deleted')
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed to delete') }
-    finally { setActingUserIds((prev) => { const s = new Set(prev); s.delete(id); return s }) }
+      setUsers(p => p.filter(u => u._id !== id)); toast.success('User deleted')
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
+    finally { setActingUserIds(p => { const s = new Set(p); s.delete(id); return s }) }
   }
 
-  // ── Filters ───────────────────────────────────────────────
   const filteredUsers = users
-    .filter((u) => roleFilter === 'all' || u.role === roleFilter)
-    .filter((u) => !searchQuery || u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(u => roleFilter === 'all' || u.role === roleFilter)
+    .filter(u => !searchQuery || u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredDonations = statusFilter === 'all' ? donations : donations.filter(d => d.status === statusFilter)
 
-  const filteredDonations = statusFilter === 'all' ? donations : donations.filter((d) => d.status === statusFilter)
+  const navItems = [
+    { id: 'overview', label: 'Overview', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2"/></svg> },
+    { id: 'analytics', label: 'Analytics', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg> },
+    { id: 'users', label: 'Users', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> },
+    { id: 'donations', label: 'Donations', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg> },
+  ]
 
-  const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500'
+  const inputCls = 'w-full rounded-xl px-3 py-2 text-sm focus:outline-none transition text-primary'
+  const inputSty = { backgroundColor: 'var(--bg-base)', border: '1px solid var(--border)' }
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <svg className="animate-spin h-8 w-8 text-green-600" viewBox="0 0 24 24" fill="none">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+  if (!user || loading) return (
+    <div className="min-h-screen flex items-center justify-center page-bg">
+      <svg className="animate-spin h-8 w-8" style={{ color: 'var(--accent)' }} viewBox="0 0 24 24" fill="none">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
       </svg>
     </div>
   )
 
   return (
-    <ProtectedRoute requiredRole="admin">
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard 🛡️</h1>
-          <p className="text-gray-500 text-sm mt-1">Full platform control</p>
-        </div>
-        <button onClick={fetchAll} className="text-sm text-green-600 border border-green-300 px-3 py-1.5 rounded-lg hover:bg-green-50 transition">
-          🔄 Refresh
-        </button>
-      </div>
+    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={setActiveTab}
+      title="Admin Dashboard" subtitle="Full platform control">
 
-      {/* Quick stats bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: 'Total Users', value: users.length, icon: '👥' },
-          { label: 'Donors', value: users.filter(u => u.role === 'donor').length, icon: '🏠' },
-          { label: 'NGOs', value: users.filter(u => u.role === 'ngo').length, icon: '🤝' },
-          { label: 'Donations', value: donations.length, icon: '📦' },
-        ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
-            <span className="text-2xl">{s.icon}</span>
-            <div>
-              <p className="text-xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-xs text-gray-500">{s.label}</p>
-            </div>
+      {/* Overview */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard label="Total Users" value={users.length} color="#22c55e" icon="👥" />
+            <StatCard label="Donors" value={users.filter(u => u.role === 'donor').length} color="#3b82f6" icon="🏠" />
+            <StatCard label="NGOs" value={users.filter(u => u.role === 'ngo').length} color="#f59e0b" icon="🤝" />
+            <StatCard label="Donations" value={donations.length} color="#d946ef" icon="📦" />
           </div>
-        ))}
-      </div>
-
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {[['analytics', '📊 Analytics'], ['users', '👥 Users'], ['donations', '📦 Donations']].map(([key, label]) => (
-          <button key={key} onClick={() => setActiveTab(key)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeTab === key ? 'bg-green-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-green-400'}`}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── TAB: Analytics ── */}
-      {activeTab === 'analytics' && <AnalyticsCharts analytics={analytics} />}
-
-      {/* ── TAB: Users ── */}
-      {activeTab === 'users' && (
-        <div className="space-y-4">
-          {/* Toolbar */}
-          <div className="flex flex-wrap gap-3 items-center justify-between">
-            <div className="flex flex-wrap gap-2 items-center">
-              {ROLE_FILTERS.map((r) => (
-                <button key={r} onClick={() => setRoleFilter(r)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${roleFilter === r ? 'bg-green-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-green-400'}`}>
-                  {r.charAt(0).toUpperCase() + r.slice(1)}
-                </button>
-              ))}
-              <input
-                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search name or email..."
-                className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-52"
-              />
-            </div>
-            <button onClick={openCreate}
-              className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition">
-              + Add User
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard label="Pending" value={donations.filter(d => d.status === 'pending').length} color="#f59e0b" icon="⏳" />
+            <StatCard label="Accepted" value={donations.filter(d => d.status === 'accepted').length} color="#3b82f6" icon="✅" />
+            <StatCard label="Collected" value={donations.filter(d => d.status === 'collected').length} color="#8b5cf6" icon="🚗" />
+            <StatCard label="Completed" value={donations.filter(d => d.status === 'completed').length} color="#22c55e" icon="🎉" />
+          </div>
+          <div className="flex justify-end">
+            <button onClick={fetchAll} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition text-secondary hover:text-primary"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Refresh
             </button>
-          </div>
-
-          {/* Users table */}
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-                <tr>
-                  {['Name', 'Email', 'Phone', 'Role', 'Donor Type', 'Points', 'Donations', 'Joined', 'Actions'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left font-semibold whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((u, i) => (
-                  <tr key={u._id} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-green-50 transition`}>
-                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{u.name}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{u.email}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{u.phone || '—'}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${roleBadge(u.role)}`}>{u.role}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 capitalize text-xs">{u.donorType?.replace(/_/g, ' ') || '—'}</td>
-                    <td className="px-4 py-3 text-green-700 font-semibold">⭐ {u.points}</td>
-                    <td className="px-4 py-3 text-gray-600">{u.donationCount}</td>
-                    <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1 flex-wrap">
-                        <button onClick={() => openDetail(u)} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded transition">View</button>
-                        <button onClick={() => openEdit(u)} className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-1 rounded transition">Edit</button>
-                        <button onClick={() => openReset(u)} className="text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-2 py-1 rounded transition">Reset PW</button>
-                        {u.role !== 'admin' && (
-                          <button onClick={() => handleDeleteUser(u._id)} disabled={actingUserIds.has(u._id)}
-                            className="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded transition disabled:opacity-40">
-                            {actingUserIds.has(u._id) ? '...' : 'Delete'}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredUsers.length === 0 && <p className="text-center text-gray-400 py-8">No users found</p>}
           </div>
         </div>
       )}
 
-      {/* ── TAB: Donations ── */}
+      {/* Analytics */}
+      {activeTab === 'analytics' && <AnalyticsCharts analytics={analytics} />}
+
+      {/* Users */}
+      {activeTab === 'users' && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-3 items-center justify-between">
+            <div className="flex flex-wrap gap-2 items-center">
+              {ROLE_FILTERS.map(r => (
+                <button key={r} onClick={() => setRoleFilter(r)}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium border transition"
+                  style={{ backgroundColor: roleFilter === r ? 'var(--accent)' : 'var(--bg-card)', color: roleFilter === r ? 'white' : 'var(--text-secondary)', borderColor: roleFilter === r ? 'var(--accent)' : 'var(--border)' }}>
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </button>
+              ))}
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search name or email..."
+                className="rounded-xl px-3 py-1.5 text-xs focus:outline-none w-52 text-primary"
+                style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }} />
+            </div>
+            <button onClick={openCreate} className="px-4 py-2 rounded-xl text-white text-sm font-semibold transition"
+              style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+              + Add User
+            </button>
+          </div>
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead style={{ backgroundColor: 'var(--bg-surface)' }}>
+                  <tr>
+                    {['Name', 'Email', 'Phone', 'Role', 'Points', 'Donations', 'Joined', 'Actions'].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-widest whitespace-nowrap text-muted">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.map((u, i) => {
+                    const rc = roleColor(u.role)
+                    return (
+                      <tr key={u._id} className="border-t transition" style={{ borderColor: 'var(--border)', backgroundColor: i % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-surface)' }}>
+                        <td className="px-4 py-3 font-medium text-primary whitespace-nowrap">{u.name}</td>
+                        <td className="px-4 py-3 text-xs text-secondary">{u.email}</td>
+                        <td className="px-4 py-3 text-xs text-secondary">{u.phone || '—'}</td>
+                        <td className="px-4 py-3">
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: rc.bg, color: rc.text }}>{u.role}</span>
+                        </td>
+                        <td className="px-4 py-3 text-xs font-semibold" style={{ color: 'var(--accent)' }}>⭐ {u.points}</td>
+                        <td className="px-4 py-3 text-xs text-secondary">{u.donationCount}</td>
+                        <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-1 flex-wrap">
+                            {[['View', () => openDetail(u), '#3b82f6'], ['Edit', () => openEdit(u), '#f59e0b'], ['Reset PW', () => openReset(u), '#8b5cf6']].map(([label, fn, color]) => (
+                              <button key={label} onClick={fn} className="text-xs px-2 py-1 rounded-lg font-medium transition"
+                                style={{ backgroundColor: `${color}15`, color }}>{label}</button>
+                            ))}
+                            {u.role !== 'admin' && (
+                              <button onClick={() => handleDeleteUser(u._id)} disabled={actingUserIds.has(u._id)}
+                                className="text-xs px-2 py-1 rounded-lg font-medium transition disabled:opacity-40"
+                                style={{ backgroundColor: 'rgba(239,68,68,0.12)', color: '#ef4444' }}>
+                                {actingUserIds.has(u._id) ? '...' : 'Delete'}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              {filteredUsers.length === 0 && <p className="text-center text-muted py-8 text-sm">No users found</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Donations */}
       {activeTab === 'donations' && (
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            {STATUS_FILTERS.map((s) => (
+            {STATUS_FILTERS.map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition ${statusFilter === s ? 'bg-green-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-green-400'}`}>
+                className="px-3 py-1.5 rounded-full text-xs font-medium border transition"
+                style={{ backgroundColor: statusFilter === s ? 'var(--accent)' : 'var(--bg-card)', color: statusFilter === s ? 'white' : 'var(--text-secondary)', borderColor: statusFilter === s ? 'var(--accent)' : 'var(--border)' }}>
                 {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
@@ -296,181 +278,111 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ── MODAL: Create User ── */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Add New User</h2>
-              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-            </div>
-            <form onSubmit={handleCreate} className="space-y-3">
-              {[['name','Name','text',true],['email','Email','email',true],['password','Password (default: rescuebite123)','password',false],['location','City / Area','text',true],['address','Full Address','text',true],['mapLink','Google Maps Link','text',true],['phone','Phone','tel',true]].map(([field, label, type, req]) => (
-                <div key={field}>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{label}{req ? ' *' : ''}</label>
-                  <input type={type} value={createForm[field] || ''} onChange={(e) => setCreateForm(p => ({...p, [field]: e.target.value}))} required={req} className={inputClass} />
-                </div>
+      {/* Modal helper */}
+      {[
+        { show: showCreateModal, close: () => setShowCreateModal(false), title: 'Add New User', onSubmit: handleCreate, submitLabel: 'Create User', submitColor: '#22c55e',
+          fields: (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                {[['name','Name','text',true],['email','Email','email',true],['password','Password','password',false],['phone','Phone','tel',true]].map(([f,l,t,r]) => (
+                  <div key={f}><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">{l}{r?' *':''}</label>
+                  <input type={t} value={createForm[f]||''} onChange={e=>setCreateForm(p=>({...p,[f]:e.target.value}))} required={r} className={inputCls} style={inputSty}/></div>
+                ))}
+              </div>
+              {[['location','City / Area','text'],['address','Full Address','text'],['mapLink','Google Maps Link','text']].map(([f,l,t]) => (
+                <div key={f}><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">{l} *</label>
+                <input type={t} value={createForm[f]||''} onChange={e=>setCreateForm(p=>({...p,[f]:e.target.value}))} required className={inputCls} style={inputSty}/></div>
               ))}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Role *</label>
-                <select value={createForm.role} onChange={(e) => setCreateForm(p => ({...p, role: e.target.value}))} className={inputClass}>
-                  <option value="donor">Donor</option>
-                  <option value="ngo">NGO</option>
-                  <option value="admin">Admin</option>
-                </select>
+              <div><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">Role *</label>
+              <select value={createForm.role} onChange={e=>setCreateForm(p=>({...p,role:e.target.value}))} className={inputCls} style={inputSty}>
+                <option value="donor">Donor</option><option value="ngo">NGO</option><option value="admin">Admin</option>
+              </select></div>
+              {createForm.role==='donor'&&<div><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">Donor Type</label>
+              <select value={createForm.donorType} onChange={e=>setCreateForm(p=>({...p,donorType:e.target.value}))} className={inputCls} style={inputSty}>
+                {['individual','restaurant','marriage_hall','hotel','other'].map(t=><option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
+              </select></div>}
+            </>
+          )
+        },
+        { show: showEditModal, close: () => setShowEditModal(false), title: `Edit — ${selectedUser?.name}`, onSubmit: handleEdit, submitLabel: 'Save Changes', submitColor: '#3b82f6',
+          fields: selectedUser && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                {[['name','Name'],['email','Email'],['location','City'],['phone','Phone']].map(([f,l]) => (
+                  <div key={f}><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">{l}</label>
+                  <input value={editForm[f]||''} onChange={e=>setEditForm(p=>({...p,[f]:e.target.value}))} className={inputCls} style={inputSty}/></div>
+                ))}
               </div>
-              {createForm.role === 'donor' && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Donor Type</label>
-                  <select value={createForm.donorType} onChange={(e) => setCreateForm(p => ({...p, donorType: e.target.value}))} className={inputClass}>
-                    {['individual','restaurant','marriage_hall','hotel','other'].map(t => <option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
-                  </select>
-                </div>
-              )}
-              <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">Cancel</button>
-                <button type="submit" disabled={modalLoading} className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white py-2 rounded-lg text-sm font-medium">
-                  {modalLoading ? 'Creating...' : 'Create User'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ── MODAL: Edit User ── */}
-      {showEditModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Edit User</h2>
-              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <div><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">Points</label>
+              <input type="number" value={editForm.points??0} onChange={e=>setEditForm(p=>({...p,points:e.target.value}))} className={inputCls} style={inputSty}/></div>
+              <div><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">Role</label>
+              <select value={editForm.role} onChange={e=>setEditForm(p=>({...p,role:e.target.value}))} className={inputCls} style={inputSty}>
+                <option value="donor">Donor</option><option value="ngo">NGO</option>
+              </select></div>
+            </>
+          )
+        },
+        { show: showResetModal, close: () => setShowResetModal(false), title: `Reset Password — ${selectedUser?.name}`, onSubmit: handleResetPassword, submitLabel: 'Reset Password', submitColor: '#8b5cf6',
+          fields: (
+            <div><label className="block text-xs font-semibold uppercase tracking-widest mb-1 text-muted">New Password *</label>
+            <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required minLength={6} placeholder="Min 6 characters" className={inputCls} style={inputSty}/></div>
+          )
+        },
+      ].map(({ show, close, title, onSubmit, submitLabel, submitColor, fields }) => show && (
+        <div key={title} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+          <div className="rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 border" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-bold text-primary">{title}</h2>
+              <button onClick={close} className="text-muted hover:text-primary transition">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
             </div>
-            <form onSubmit={handleEdit} className="space-y-3">
-              {[['name','Name'],['email','Email'],['location','City / Area'],['address','Full Address'],['phone','Phone']].map(([field, label]) => (
-                <div key={field}>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
-                  <input value={editForm[field] || ''} onChange={(e) => setEditForm(p => ({...p, [field]: e.target.value}))} className={inputClass} />
-                </div>
-              ))}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Points</label>
-                <input type="number" value={editForm.points ?? 0} onChange={(e) => setEditForm(p => ({...p, points: e.target.value}))} className={inputClass} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Role</label>
-                <select value={editForm.role} onChange={(e) => setEditForm(p => ({...p, role: e.target.value}))} className={inputClass}>
-                  <option value="donor">Donor</option>
-                  <option value="ngo">NGO</option>
-                </select>
-              </div>
-              {editForm.role === 'donor' && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Donor Type</label>
-                  <select value={editForm.donorType || 'individual'} onChange={(e) => setEditForm(p => ({...p, donorType: e.target.value}))} className={inputClass}>
-                    {['individual','restaurant','marriage_hall','hotel','other'].map(t => <option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
-                  </select>
-                </div>
-              )}
+            <form onSubmit={onSubmit} className="space-y-3">
+              {fields}
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">Cancel</button>
-                <button type="submit" disabled={modalLoading} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white py-2 rounded-lg text-sm font-medium">
-                  {modalLoading ? 'Saving...' : 'Save Changes'}
-                </button>
+                <button type="button" onClick={close} className="flex-1 py-2 rounded-xl text-sm border font-medium text-secondary" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>Cancel</button>
+                <button type="submit" disabled={modalLoading} className="flex-1 py-2 rounded-xl text-sm text-white font-semibold disabled:opacity-60 transition"
+                  style={{ backgroundColor: submitColor }}>{modalLoading ? 'Loading...' : submitLabel}</button>
               </div>
             </form>
           </div>
         </div>
-      )}
+      ))}
 
-      {/* ── MODAL: Reset Password ── */}
-      {showResetModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Reset Password</h2>
-              <button onClick={() => setShowResetModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-            </div>
-            <p className="text-sm text-gray-500 mb-4">Resetting password for <span className="font-semibold text-gray-800">{selectedUser.name}</span></p>
-            <form onSubmit={handleResetPassword} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">New Password *</label>
-                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} className={inputClass} placeholder="Min 6 characters" />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowResetModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">Cancel</button>
-                <button type="submit" disabled={modalLoading} className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-60 text-white py-2 rounded-lg text-sm font-medium">
-                  {modalLoading ? 'Resetting...' : 'Reset Password'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ── MODAL: User Detail ── */}
+      {/* Detail modal */}
       {showDetailModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">User Details</h2>
-              <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+          <div className="rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 border" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-bold text-primary">User Details</h2>
+              <button onClick={() => setShowDetailModal(false)} className="text-muted hover:text-primary">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
             </div>
             {!userDetail ? (
-              <div className="flex justify-center py-8">
-                <svg className="animate-spin h-6 w-6 text-green-600" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                </svg>
-              </div>
+              <div className="flex justify-center py-8"><svg className="animate-spin h-6 w-6" style={{ color: 'var(--accent)' }} viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg></div>
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  {[
-                    ['Name', userDetail.user.name],
-                    ['Email', userDetail.user.email],
-                    ['Phone', userDetail.user.phone || '—'],
-                    ['Role', userDetail.user.role],
-                    ['Location', userDetail.user.location || '—'],
-                    ['Address', userDetail.user.address || '—'],
-                    ['Points', `⭐ ${userDetail.user.points}`],
-                    ['Donations', userDetail.user.donationCount],
-                    ['Joined', userDetail.user.createdAt ? new Date(userDetail.user.createdAt).toLocaleDateString() : '—'],
-                    ['Donor Type', userDetail.user.donorType?.replace(/_/g,' ') || '—'],
-                  ].map(([label, value]) => (
-                    <div key={label} className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-400">{label}</p>
-                      <p className="font-medium text-gray-800 text-xs mt-0.5 break-all">{value}</p>
+                  {[['Name',userDetail.user.name],['Email',userDetail.user.email],['Phone',userDetail.user.phone||'—'],['Role',userDetail.user.role],['Location',userDetail.user.location||'—'],['Points',`⭐ ${userDetail.user.points}`],['Donations',userDetail.user.donationCount],['Joined',userDetail.user.createdAt?new Date(userDetail.user.createdAt).toLocaleDateString():'—']].map(([l,v]) => (
+                    <div key={l} className="p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-card)' }}>
+                      <p className="text-xs text-muted">{l}</p>
+                      <p className="font-medium text-primary text-xs mt-0.5 break-all">{v}</p>
                     </div>
                   ))}
                 </div>
-                {userDetail.user.mapLink && (
-                  <a href={userDetail.user.mapLink} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-2 text-sm text-green-600 hover:underline">
-                    📍 View on Google Maps
-                  </a>
-                )}
-                {userDetail.user.badges?.length > 0 && (
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">Badges</p>
-                    <div className="flex flex-wrap gap-1">
-                      {userDetail.user.badges.map(b => <span key={b} className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{b}</span>)}
-                    </div>
-                  </div>
-                )}
                 {userDetail.donations?.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Recent Donations ({userDetail.donations.length})</p>
+                    <p className="text-xs font-semibold text-secondary mb-2">Recent Donations ({userDetail.donations.length})</p>
                     <div className="space-y-1 max-h-40 overflow-y-auto">
                       {userDetail.donations.map(d => (
-                        <div key={d._id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-xs">
-                          <span className="font-medium text-gray-800">{d.foodName}</span>
-                          <span className="text-gray-400">{d.quantity}</span>
-                          <span className={`px-2 py-0.5 rounded-full font-semibold ${
-                            d.status === 'completed' ? 'bg-green-100 text-green-700' :
-                            d.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                            d.status === 'collected' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700'
-                          }`}>{d.status}</span>
+                        <div key={d._id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ backgroundColor: 'var(--bg-card)' }}>
+                          <span className="font-medium text-primary">{d.foodName}</span>
+                          <span className="text-muted">{d.quantity}</span>
+                          <span className="px-2 py-0.5 rounded-full font-semibold" style={{
+                            backgroundColor: d.status==='completed'?'rgba(34,197,94,0.12)':d.status==='accepted'?'rgba(59,130,246,0.12)':'rgba(245,158,11,0.12)',
+                            color: d.status==='completed'?'#22c55e':d.status==='accepted'?'#3b82f6':'#f59e0b'
+                          }}>{d.status}</span>
                         </div>
                       ))}
                     </div>
@@ -481,7 +393,6 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-    </div>
-    </ProtectedRoute>
+    </DashboardLayout>
   )
 }
