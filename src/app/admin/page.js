@@ -6,6 +6,7 @@ import { getUser, isLoggedIn } from '../../utils/auth'
 import api from '../../utils/api'
 import AnalyticsCharts from '../../components/AnalyticsCharts'
 import DonationTable from '../../components/DonationTable'
+import ProtectedRoute from '../../components/ProtectedRoute'
 
 const STATUS_FILTERS = ['all', 'pending', 'accepted', 'collected', 'completed']
 const ROLE_FILTERS = ['all', 'donor', 'ngo', 'admin']
@@ -167,6 +168,7 @@ export default function AdminPage() {
   )
 
   return (
+    <ProtectedRoute requiredRole="admin">
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -480,5 +482,6 @@ export default function AdminPage() {
         </div>
       )}
     </div>
+    </ProtectedRoute>
   )
 }

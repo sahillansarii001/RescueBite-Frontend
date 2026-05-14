@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import api from '../../utils/api'
-import { saveAuth, isLoggedIn } from '../../utils/auth'
+import { saveAuth, isLoggedIn, getUser } from '../../utils/auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -13,7 +13,11 @@ export default function LoginPage() {
 
   // Already logged in — go to dashboard
   useEffect(() => {
-    if (isLoggedIn()) router.replace('/dashboard')
+    if (!isLoggedIn()) return
+    const role = getUser()?.role
+    if (role === 'admin') router.replace('/admin')
+    else if (role === 'ngo') router.replace('/dashboard/ngo')
+    else router.replace('/dashboard/donor')
   }, [router])
 
   const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
@@ -25,7 +29,10 @@ export default function LoginPage() {
       const res = await api.post('/auth/login', form)
       saveAuth(res.data.token, res.data.user)
       toast.success('Welcome back!')
-      router.push('/dashboard')
+      const role = res.data.user?.role
+      if (role === 'admin') router.push('/admin')
+      else if (role === 'ngo') router.push('/dashboard/ngo')
+      else router.push('/dashboard/donor')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed')
     } finally {

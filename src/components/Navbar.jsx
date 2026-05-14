@@ -1,8 +1,16 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { getUser, removeAuth, isLoggedIn } from '../utils/auth'
+
+const NAV_LINKS = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'How It Works', href: '/how-it-works' },
+  { label: 'Impact', href: '/impact' },
+  { label: 'Contact', href: '/contact' },
+]
 
 export default function Navbar() {
   const router = useRouter()
@@ -10,14 +18,11 @@ export default function Navbar() {
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [lang, setLang] = useState('en')
-  const [mounted, setMounted] = useState(false) // prevents SSR/hydration mismatch
+  const [mounted, setMounted] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   const syncUser = useCallback(() => {
-    if (isLoggedIn()) {
-      setUser(getUser())
-    } else {
-      setUser(null)
-    }
+    setUser(isLoggedIn() ? getUser() : null)
   }, [])
 
   useEffect(() => {
@@ -25,62 +30,42 @@ export default function Navbar() {
     syncUser()
   }, [pathname, syncUser])
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const handleLogout = () => {
     removeAuth()
-    setUser(null)        // immediately clear user state
+    setUser(null)
     setMenuOpen(false)
     router.push('/login')
   }
 
-  // Simple label map — no i18n dependency so it always works
   const labels = {
-    en: { dashboard: 'Dashboard', leaderboard: 'Leaderboard', logout: 'Logout', login: 'Login' },
-    hi: { dashboard: 'डैशबोर्ड', leaderboard: 'लीडरबोर्ड', logout: 'लॉग आउट', login: 'लॉगिन' },
-    mr: { dashboard: 'डॅशबोर्ड', leaderboard: 'लीडरबोर्ड', logout: 'लॉग आउट', login: 'लॉगिन' },
+    en: { logout: 'Logout', login: 'Login', signup: 'Sign Up' },
+    hi: { logout: 'लॉग आउट', login: 'लॉगिन', signup: 'साइन अप' },
+    mr: { logout: 'लॉग आउट', login: 'लॉगिन', signup: 'साइन अप' },
   }
   const t = labels[lang] || labels.en
 
-  const getDashboardHref = () => {
-    if (!user) return '/dashboard'
-    if (user.role === 'admin') return '/admin'
-    if (user.role === 'ngo') return '/dashboard/ngo'
-    return '/dashboard/donor'
-  }
-
-  const navLinks = () => {
-    if (!user) return []
-    if (user.role === 'admin') {
-      return [{ label: t.dashboard, href: '/admin' }]
-    }
-    if (user.role === 'ngo') {
-      return [{ label: t.dashboard, href: '/dashboard/ngo' }]
-    }
-    // donor — leaderboard tab is state-based, link goes to donor dashboard
-    return [
-      { label: t.dashboard, href: '/dashboard/donor' },
-      { label: t.leaderboard, href: '/dashboard/donor' },
-    ]
-  }
-
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-sm">
+    <nav className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-
-        {/* Logo */}
-        <Link href="/" className="text-green-700 font-bold text-xl flex items-center gap-1">
-          🍃 RescueBite
+        <Link href="/" className="text-green-700 font-extrabold text-xl flex items-center gap-1.5 shrink-0">
+          🍃 <span>RescueBite</span>
         </Link>
 
-        {/* Desktop nav links */}
-        <div className="hidden md:flex items-center gap-6">
-          {navLinks().map((link) => (
+        <div className="hidden lg:flex items-center gap-1">
+          {NAV_LINKS.map((link) => (
             <Link
-              key={link.label}
+              key={link.href}
               href={link.href}
-              className={`font-medium text-sm transition ${
-                pathname === link.href.split('?')[0]
-                  ? 'text-green-700'
-                  : 'text-gray-600 hover:text-green-700'
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                pathname === link.href
+                  ? 'text-green-700 bg-green-50'
+                  : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
               }`}
             >
               {link.label}
@@ -88,92 +73,89 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Right side — language + auth */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <select
             value={lang}
             onChange={(e) => setLang(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-gray-600 focus:outline-none cursor-pointer"
+            className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none cursor-pointer bg-white"
           >
             <option value="en">EN</option>
             <option value="hi">HI</option>
             <option value="mr">MR</option>
           </select>
-
           {mounted && (
             user ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm px-4 py-1.5 rounded-lg transition font-medium"
-              >
+              <button type="button" onClick={handleLogout}
+                className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-1.5 rounded-lg transition font-medium">
                 {t.logout}
               </button>
             ) : (
-              <Link
-                href="/login"
-                className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-1.5 rounded-lg transition font-medium"
-              >
-                {t.login}
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href="/login"
+                  className="text-green-700 border border-green-600 hover:bg-green-50 text-sm px-4 py-1.5 rounded-lg transition font-medium">
+                  {t.login}
+                </Link>
+                <Link href="/signup"
+                  className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-1.5 rounded-lg transition font-medium">
+                  {t.signup}
+                </Link>
+              </div>
             )
           )}
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          type="button"
-          className="md:hidden text-gray-600 text-xl p-1"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Toggle menu"
-        >
-          {menuOpen ? '✕' : '☰'}
+        <button type="button"
+          className="lg:hidden text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition"
+          onClick={() => setMenuOpen((o) => !o)} aria-label="Toggle menu">
+          {menuOpen ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
         </button>
       </div>
 
-      {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 flex flex-col gap-4 shadow-md">
-          {navLinks().map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="text-gray-700 font-medium text-sm hover:text-green-700"
-              onClick={() => setMenuOpen(false)}
-            >
+        <div className="lg:hidden bg-white border-t border-gray-100 px-4 py-4 flex flex-col gap-1 shadow-lg">
+          {NAV_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
+              className={`px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+                pathname === link.href ? 'text-green-700 bg-green-50' : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
+              }`}>
               {link.label}
             </Link>
           ))}
-
-          <select
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-gray-600 w-fit focus:outline-none"
-          >
-            <option value="en">EN</option>
-            <option value="hi">HI</option>
-            <option value="mr">MR</option>
-          </select>
-
-          {mounted && (
-            user ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg w-fit font-medium"
-              >
-                {t.logout}
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                className="text-green-700 font-medium text-sm"
-                onClick={() => setMenuOpen(false)}
-              >
-                {t.login}
-              </Link>
-            )
-          )}
+          <div className="border-t border-gray-100 mt-2 pt-3 flex flex-col gap-2">
+            <select value={lang} onChange={(e) => setLang(e.target.value)}
+              className="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-600 w-fit focus:outline-none bg-white">
+              <option value="en">EN</option>
+              <option value="hi">HI</option>
+              <option value="mr">MR</option>
+            </select>
+            {mounted && (
+              user ? (
+                <button type="button" onClick={handleLogout}
+                  className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg w-fit font-medium">
+                  {t.logout}
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <Link href="/login" onClick={() => setMenuOpen(false)}
+                    className="text-green-700 border border-green-600 text-sm px-4 py-2 rounded-lg font-medium">
+                    {t.login}
+                  </Link>
+                  <Link href="/signup" onClick={() => setMenuOpen(false)}
+                    className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg font-medium">
+                    {t.signup}
+                  </Link>
+                </div>
+              )
+            )}
+          </div>
         </div>
       )}
     </nav>
