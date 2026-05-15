@@ -60,16 +60,22 @@ export default function NgoDashboard() {
   const fetchData = async (userId, silent = false) => {
     if (!silent) setLoading(true)
     try {
-      const [pendingRes, acceptedRes, requestsRes] = await Promise.all([
+      const [pendingRes, acceptedRes, requestsRes, profileRes] = await Promise.all([
         api.get('/donations?status=pending'),
         api.get(`/donations?acceptedBy=${userId}`),
         api.get('/requests/my-requests'),
+        api.get('/users/profile')
       ])
       setAvailable(pendingRes.data.donations || [])
       setAccepted(acceptedRes.data.donations || [])
       setMyRequests(requestsRes.data.requests || [])
+
+      if (profileRes.data.user) {
+        setUser(profileRes.data.user)
+        localStorage.setItem('user', JSON.stringify(profileRes.data.user))
+      }
     } catch { 
-      if (!silent) toast.error('Failed to load donations') 
+      if (!silent) toast.error('Failed to load dashboard data') 
     }
     finally { 
       if (!silent) setLoading(false) 

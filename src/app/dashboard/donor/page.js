@@ -65,16 +65,23 @@ export default function DonorDashboard() {
   const fetchDonations = async (userId, silent = false) => {
     if (!silent) setLoading(true)
     try {
-      const [donationsRes, requestsRes] = await Promise.all([
+      const [donationsRes, requestsRes, profileRes] = await Promise.all([
         api.get(`/donations?donorId=${userId}`),
         api.get('/requests/active'),
+        api.get('/users/profile')
       ])
+      
       const list = donationsRes.data.donations || []
       setMyDonations(list)
       setLastDonation(list[0] || null)
       setNgoRequests(requestsRes.data.requests || [])
+      
+      if (profileRes.data.user) {
+        setUser(profileRes.data.user)
+        localStorage.setItem('user', JSON.stringify(profileRes.data.user))
+      }
     } catch { 
-      if (!silent) toast.error('Failed to load donations') 
+      if (!silent) toast.error('Failed to load dashboard data') 
     }
     finally { 
       if (!silent) setLoading(false) 
