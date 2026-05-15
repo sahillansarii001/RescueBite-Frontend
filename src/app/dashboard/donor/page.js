@@ -306,10 +306,6 @@ export default function DonorDashboard() {
         </div>
       )}
 
-          </div>
-        </div>
-      )}
-
       {/* NGO Requests */}
       {activeTab === 'requests' && (
         <div className="space-y-6">
