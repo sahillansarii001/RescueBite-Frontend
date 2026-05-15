@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { removeAuth } from './auth'
 
-const api = axios.create({ baseURL: 'http://localhost:5000/api' })
+const api = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api' })
 
 // Attach token to every request
 api.interceptors.request.use((config) => {
