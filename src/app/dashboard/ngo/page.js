@@ -294,13 +294,20 @@ export default function NgoDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {accepted.filter(d => d.status === 'completed').map(d => (
-              <div key={d._id} className="rounded-3xl border border-green-200/50 p-5 space-y-2 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-bold text-green-900 text-base">{d.foodName}</h3>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e' }}>Completed</span>
+              <div key={d._id} className="group rounded-3xl border border-green-200/50 overflow-hidden bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="w-full h-32 bg-green-50 border-b border-green-100 flex items-center justify-center overflow-hidden">
+                  {d.image 
+                    ? <img src={d.image} alt={d.foodName} className="w-full h-full object-cover grayscale-[40%] group-hover:grayscale-0 transition-all duration-500" />
+                    : <Utensils className="w-8 h-8 text-green-200" />}
                 </div>
-                <p className="text-xs font-medium text-gray-600">{d.quantity} · {d.location}</p>
-                {d.donorId?.name && <p className="text-xs text-gray-500 font-medium pt-1">Donor: {d.donorId.name}</p>}
+                <div className="p-5 space-y-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="font-bold text-green-900 text-base truncate">{d.foodName}</h3>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-50 text-green-600 border border-green-100">Completed</span>
+                  </div>
+                  <p className="text-xs font-medium text-gray-600">{d.quantity} · {d.location}</p>
+                  {d.donorId?.name && <p className="text-xs text-gray-500 font-medium pt-1 border-t border-green-100/50 mt-1">Donor: {d.donorId.name}</p>}
+                </div>
               </div>
             ))}
           </div>
