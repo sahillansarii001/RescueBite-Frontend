@@ -7,7 +7,9 @@ import api from '../../utils/api'
 import AnalyticsCharts, { AnalyticsChartsSkeleton } from '../../components/AnalyticsCharts'
 import DonationTable, { DonationTableSkeleton } from '../../components/DonationTable'
 import DashboardLayout from '../../components/DashboardLayout'
-import { Users, Home, Handshake, Package, Clock, CheckCircle, Truck, PartyPopper, RefreshCw, Plus, X, Star, LayoutDashboard, BarChart2, UserCog, List, Loader2 } from 'lucide-react'
+import ProfileSection from '../../components/ProfileSection'
+import SecuritySection from '../../components/SecuritySection'
+import { Users, Home, Handshake, Package, Clock, CheckCircle, Truck, PartyPopper, RefreshCw, Plus, X, Star, LayoutDashboard, BarChart2, UserCog, List, Loader2, User, ShieldCheck } from 'lucide-react'
 
 const STATUS_FILTERS = ['all', 'pending', 'accepted', 'collected', 'completed']
 const ROLE_FILTERS = ['all', 'donor', 'ngo', 'admin']
@@ -38,6 +40,16 @@ export default function AdminPage() {
   const [users, setUsers] = useState([])
   const [donations, setDonations] = useState([])
   const [activeTab, setActiveTab] = useState('overview')
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('adminTab')
+    if (saved) setActiveTab(saved)
+  }, [])
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    localStorage.setItem('adminTab', tab)
+  }
   const [loading, setLoading] = useState(true)
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -61,17 +73,27 @@ export default function AdminPage() {
     if (!u || u.role !== 'admin') { router.push('/dashboard'); return }
     setUser(u)
     fetchAll()
+    
+    const interval = setInterval(() => {
+      fetchAll(true)
+    }, 10000)
+    
+    return () => clearInterval(interval)
   }, [router])
 
-  const fetchAll = async () => {
-    setLoading(true)
+  const fetchAll = async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
       const [aRes, uRes, dRes] = await Promise.all([api.get('/analytics'), api.get('/users/all'), api.get('/donations')])
       setAnalytics(aRes.data.analytics)
       setUsers(uRes.data.users || [])
       setDonations(dRes.data.donations || [])
-    } catch { toast.error('Failed to load admin data') }
-    finally { setLoading(false) }
+    } catch { 
+      if (!silent) toast.error('Failed to load admin data') 
+    }
+    finally { 
+      if (!silent) setLoading(false) 
+    }
   }
 
   const deleteDonation = async (id) => {
@@ -148,6 +170,8 @@ export default function AdminPage() {
     { id: 'analytics', label: 'Analytics', icon: <BarChart2 className="w-4 h-4" /> },
     { id: 'users', label: 'Users', icon: <UserCog className="w-4 h-4" /> },
     { id: 'donations', label: 'Donations', icon: <List className="w-4 h-4" /> },
+    { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
+    { id: 'security', label: 'Security', icon: <ShieldCheck className="w-4 h-4" /> },
   ]
 
   const inputCls = 'w-full rounded-xl px-3 py-2 text-sm focus:outline-none transition text-primary'
@@ -160,14 +184,14 @@ export default function AdminPage() {
   )
 
   return (
-    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={setActiveTab}
+    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={handleTabChange}
       title="Admin Dashboard" subtitle="Full platform control">
 
       {/* Overview */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Total Users" value={users.length} color="#22c55e" icon={Users} />
+            <StatCard label="Total Users" value={users.filter(u => u.role !== 'admin').length} color="#22c55e" icon={Users} />
             <StatCard label="Donors" value={users.filter(u => u.role === 'donor').length} color="#3b82f6" icon={Home} />
             <StatCard label="NGOs" value={users.filter(u => u.role === 'ngo').length} color="#f59e0b" icon={Handshake} />
             <StatCard label="Donations" value={donations.length} color="#d946ef" icon={Package} />
@@ -276,6 +300,21 @@ export default function AdminPage() {
           <DonationTable donations={filteredDonations} onDelete={deleteDonation} deletingIds={deletingIds} />
         </div>
       )}
+
+      {/* Profile */}
+      {activeTab === 'profile' && (
+        <ProfileSection 
+          user={user} 
+          onSuccess={(u) => { 
+            const merged = { ...user, ...u }
+            setUser(merged)
+            localStorage.setItem('user', JSON.stringify(merged))
+          }} 
+        />
+      )}
+      
+      {/* Security */}
+      {activeTab === 'security' && <SecuritySection />}
 
       {/* Modal helper */}
       {[

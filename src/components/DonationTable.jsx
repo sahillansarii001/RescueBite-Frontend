@@ -1,6 +1,6 @@
 'use client'
 import StatusBadge from './StatusBadge'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Utensils } from 'lucide-react'
 
 export function DonationTableSkeleton() {
   return (
@@ -16,12 +16,15 @@ export function DonationTableSkeleton() {
         <tbody>
           {[1, 2, 3, 4, 5].map((row) => (
             <tr key={row} className="border-t border-green-100/50">
+              <td className="px-4 py-3"><div className="w-10 h-10 bg-green-100 rounded-lg"></div></td>
               <td className="px-4 py-3"><div className="h-4 bg-green-100 rounded w-24"></div></td>
               <td className="px-4 py-3"><div className="h-4 bg-green-50 rounded w-8"></div></td>
               <td className="px-4 py-3"><div className="h-4 bg-green-50 rounded w-16"></div></td>
               <td className="px-4 py-3"><div className="h-4 bg-green-50 rounded w-32"></div></td>
               <td className="px-4 py-3"><div className="h-4 bg-green-50 rounded w-20"></div></td>
               <td className="px-4 py-3"><div className="h-6 bg-green-100 rounded-full w-20"></div></td>
+              <td className="px-4 py-3"><div className="h-4 bg-green-50 rounded w-24"></div></td>
+              <td className="px-4 py-3"><div className="h-4 bg-green-50 rounded w-24"></div></td>
               <td className="px-4 py-3"><div className="h-4 bg-green-50 rounded w-16"></div></td>
             </tr>
           ))}
@@ -41,7 +44,7 @@ export default function DonationTable({ donations = [], onDelete, deletingIds })
       <table className="min-w-full text-sm">
         <thead className="bg-green-700 text-white text-sm font-medium">
           <tr>
-            {['Food Name', 'Quantity', 'Type', 'Location', 'Expiry', 'Status', 'Date',
+            {['Image', 'Food Name', 'Quantity', 'Type', 'Location', 'Expiry', 'Status', 'Donor', 'Accepted By', 'Date',
               ...(onDelete ? ['Action'] : [])
             ].map((h) => (
               <th key={h} className="px-4 py-3.5 text-left font-semibold tracking-wide">{h}</th>
@@ -53,12 +56,17 @@ export default function DonationTable({ donations = [], onDelete, deletingIds })
             const isDeleting = deletingIds?.has(d._id)
             return (
               <tr key={d._id} className={`${i % 2 === 0 ? 'bg-white' : 'bg-green-50/50'} hover:bg-green-100/60 transition-colors group`}>
+                <td className="px-4 py-3">
+                  {d.image ? <img src={d.image} alt="Food" className="w-10 h-10 rounded-lg object-cover" /> : <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center"><Utensils className="w-5 h-5 text-green-300" /></div>}
+                </td>
                 <td className="px-4 py-3 font-semibold text-green-900">{d.foodName}</td>
                 <td className="px-4 py-3 text-gray-600 font-medium">{d.quantity}</td>
                 <td className="px-4 py-3 text-gray-600 capitalize">{d.foodType}</td>
                 <td className="px-4 py-3 text-gray-600 truncate max-w-xs">{d.location}</td>
                 <td className="px-4 py-3 text-gray-600">{d.expiryTime ? new Date(d.expiryTime).toLocaleDateString() : '—'}</td>
                 <td className="px-4 py-3"><StatusBadge status={d.status} /></td>
+                <td className="px-4 py-3 text-gray-600">{d.donorId?.name || '—'}</td>
+                <td className="px-4 py-3 text-blue-500 font-medium">{d.acceptedBy?.name || '—'}</td>
                 <td className="px-4 py-3 text-gray-400">{d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '—'}</td>
                 {onDelete && (
                   <td className="px-4 py-3">

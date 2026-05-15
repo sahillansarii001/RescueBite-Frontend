@@ -7,7 +7,9 @@ import api from '../../../utils/api'
 import DashboardLayout from '../../../components/DashboardLayout'
 import DonationCard, { DonationCardSkeleton } from '../../../components/DonationCard'
 import StatusBadge from '../../../components/StatusBadge'
-import { LayoutDashboard, Inbox, ListTodo, CheckSquare, ClipboardList, CheckCircle2, Utensils, Loader2 } from 'lucide-react'
+import ProfileSection from '../../../components/ProfileSection'
+import SecuritySection from '../../../components/SecuritySection'
+import { LayoutDashboard, Inbox, ListTodo, CheckSquare, ClipboardList, CheckCircle2, Utensils, Loader2, User, Handshake, Plus, X, ShieldCheck } from 'lucide-react'
 
 const StatCard = ({ label, value, color }) => (
   <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
@@ -21,7 +23,21 @@ export default function NgoDashboard() {
   const [user, setUser] = useState(null)
   const [available, setAvailable] = useState([])
   const [accepted, setAccepted] = useState([])
+  const [myRequests, setMyRequests] = useState([])
   const [activeTab, setActiveTab] = useState('overview')
+  const [showRequestModal, setShowRequestModal] = useState(false)
+  const [requestQuantity, setRequestQuantity] = useState('')
+  const [requesting, setRequesting] = useState(false)
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('ngoTab')
+    if (saved) setActiveTab(saved)
+  }, [])
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    localStorage.setItem('ngoTab', tab)
+  }
   const [loading, setLoading] = useState(false)
   const [actingOn, setActingOn] = useState(new Set())
   const userIdRef = useRef(null)
@@ -33,19 +49,31 @@ export default function NgoDashboard() {
     setUser(u)
     userIdRef.current = u._id
     fetchData(u._id)
+    
+    const interval = setInterval(() => {
+      fetchData(u._id, true)
+    }, 10000)
+    
+    return () => clearInterval(interval)
   }, [router])
 
-  const fetchData = async (userId) => {
-    setLoading(true)
+  const fetchData = async (userId, silent = false) => {
+    if (!silent) setLoading(true)
     try {
-      const [pendingRes, acceptedRes] = await Promise.all([
+      const [pendingRes, acceptedRes, requestsRes] = await Promise.all([
         api.get('/donations?status=pending'),
         api.get(`/donations?acceptedBy=${userId}`),
+        api.get('/requests/my-requests'),
       ])
       setAvailable(pendingRes.data.donations || [])
       setAccepted(acceptedRes.data.donations || [])
-    } catch { toast.error('Failed to load donations') }
-    finally { setLoading(false) }
+      setMyRequests(requestsRes.data.requests || [])
+    } catch { 
+      if (!silent) toast.error('Failed to load donations') 
+    }
+    finally { 
+      if (!silent) setLoading(false) 
+    }
   }
 
   const acceptDonation = async (id) => {
@@ -78,6 +106,23 @@ export default function NgoDashboard() {
     finally { setActingOn(p => { const s = new Set(p); s.delete(id); return s }) }
   }
 
+  const handleCreateRequest = async (e) => {
+    e.preventDefault()
+    if (!requestQuantity.trim()) return
+    setRequesting(true)
+    try {
+      await api.post('/requests', { quantityNeeded: requestQuantity })
+      toast.success('Food request posted!')
+      setShowRequestModal(false)
+      setRequestQuantity('')
+      fetchData(userIdRef.current, true)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to post request')
+    } finally {
+      setRequesting(false)
+    }
+  }
+
   const completed = accepted.filter(d => d.status === 'completed').length
   const inProgress = accepted.filter(d => d.status !== 'completed').length
 
@@ -85,7 +130,10 @@ export default function NgoDashboard() {
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'available', label: 'Available', icon: <Inbox className="w-4 h-4" /> },
     { id: 'accepted', label: 'My Accepted', icon: <ListTodo className="w-4 h-4" /> },
+    { id: 'requests', label: 'My Requests', icon: <Handshake className="w-4 h-4" /> },
     { id: 'history', label: 'Completed', icon: <CheckSquare className="w-4 h-4" /> },
+    { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
+    { id: 'security', label: 'Security', icon: <ShieldCheck className="w-4 h-4" /> },
   ]
 
   if (!user) return (
@@ -95,7 +143,7 @@ export default function NgoDashboard() {
   )
 
   return (
-    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={setActiveTab}
+    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={handleTabChange}
       title={`Welcome, ${user.name}`} subtitle="NGO Dashboard">
 
       {/* Overview */}
@@ -151,6 +199,14 @@ export default function NgoDashboard() {
                 <StatusBadge status={d.status} />
               </div>
             ))}
+          </div>
+
+          <div className="flex justify-end">
+            <button onClick={() => setShowRequestModal(true)}
+              className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center gap-2 hover:-translate-y-0.5 active:translate-y-0">
+              <Plus className="w-4 h-4" />
+              Request Food
+            </button>
           </div>
         </div>
       )}
@@ -249,6 +305,116 @@ export default function NgoDashboard() {
             ))}
           </div>
         )
+      )}
+
+      {/* Food Requests */}
+      {activeTab === 'requests' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-green-900">My Food Requests</h2>
+            <button onClick={() => setShowRequestModal(true)}
+              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-2">
+              <Plus className="w-3.5 h-3.5" />
+              New Request
+            </button>
+          </div>
+          {myRequests.length === 0 ? (
+            <div className="text-center py-24 text-gray-400 flex flex-col items-center border border-dashed border-green-200 rounded-3xl bg-white/40">
+              <Handshake className="w-16 h-16 mb-4 text-green-200" />
+              <p className="text-sm font-medium">You haven't made any food requests yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {myRequests.map(r => (
+                <div key={r._id} className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Request</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                      r.status === 'active' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'
+                    }`}>
+                      {r.status}
+                    </span>
+                  </div>
+                  <p className="text-xl font-black text-gray-800 mb-1">{r.quantityNeeded}</p>
+                  <p className="text-xs font-medium text-gray-500 mb-4">Posted on {new Date(r.createdAt).toLocaleDateString()}</p>
+                  
+                  {r.status === 'fulfilled' && r.fulfilledBy && (
+                    <div className="mt-4 pt-4 border-t border-green-100 flex flex-col gap-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-green-600">Fulfilled By</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-700 text-xs">
+                          {r.fulfilledBy.name?.[0]}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">{r.fulfilledBy.name}</p>
+                          <p className="text-[10px] font-medium text-gray-500">{r.fulfilledBy.phone || r.fulfilledBy.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Profile */}
+      {activeTab === 'profile' && (
+        <ProfileSection 
+          user={user} 
+          onSuccess={(u) => { 
+            const merged = { ...user, ...u }
+            setUser(merged)
+            localStorage.setItem('user', JSON.stringify(merged))
+          }} 
+        />
+      )}
+
+      {/* Security */}
+      {activeTab === 'security' && (
+        <SecuritySection />
+      )}
+
+      {/* Request Modal */}
+      {showRequestModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-green-900/40 backdrop-blur-sm" onClick={() => setShowRequestModal(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-8 animate-in fade-in zoom-in duration-300">
+            <button onClick={() => setShowRequestModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-all">
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-green-900 tracking-tight">Request Food</h2>
+              <p className="text-sm font-medium text-gray-500">Specify the quantity you need</p>
+            </div>
+
+            <form onSubmit={handleCreateRequest} className="space-y-6">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Quantity Needed</label>
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="e.g. 50 meals, 20kg rice"
+                  value={requestQuantity}
+                  onChange={(e) => setRequestQuantity(e.target.value)}
+                  className="w-full bg-green-50/50 border border-green-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                  required
+                />
+              </div>
+              
+              <button
+                type="submit"
+                disabled={requesting || !requestQuantity.trim()}
+                className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-2xl font-bold text-sm transition-all shadow-lg hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-50 disabled:translate-y-0"
+              >
+                {requesting ? <Loader2 className="animate-spin w-4 h-4" /> : <Handshake className="w-4 h-4" />}
+                {requesting ? 'Posting...' : 'Post Food Request'}
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </DashboardLayout>
   )

@@ -45,7 +45,7 @@ export default function SignupPage() {
       const payload = { ...form }
       if (form.role !== 'donor') delete payload.donorType
       const res = await api.post('/auth/register', payload)
-      saveAuth(res.data.token, res.data.user)
+      saveAuth(res.data.token, res.data.user, res.data.refreshToken)
       toast.success('Account created!')
       router.push('/dashboard')
     } catch (err) {
@@ -100,8 +100,11 @@ export default function SignupPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Full Name" name="name" placeholder="Your name" value={form.name} onChange={set} />
-              <Field label="Email" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={set} />
+              <Field 
+                label={form.role === 'ngo' ? 'NGO Name' : form.donorType === 'restaurant' ? 'Restaurant Name' : form.donorType === 'marriage_hall' ? 'Marriage Hall Name' : form.donorType === 'hotel' ? 'Hotel Name' : form.donorType === 'other' ? 'Organization/Business Name' : 'Full Name'} 
+                name="name" placeholder="Your name" value={form.name} onChange={set} 
+              />
+              <Field label="Email Address" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={set} />
             </div>
 
             <Field label="Password (min 6 chars)" name="password" type="password" placeholder="••••••••" value={form.password} onChange={set} />

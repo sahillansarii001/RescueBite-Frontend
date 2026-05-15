@@ -10,7 +10,9 @@ import DonationCard, { DonationCardSkeleton } from '../../../components/Donation
 import DonationTable, { DonationTableSkeleton } from '../../../components/DonationTable'
 import RewardCard from '../../../components/RewardCard'
 import Leaderboard from '../../../components/Leaderboard'
-import { LayoutDashboard, PlusCircle, List, Gift, Trophy, Medal, Award, Zap, Loader2, Utensils, RefreshCw } from 'lucide-react'
+import ProfileSection from '../../../components/ProfileSection'
+import SecuritySection from '../../../components/SecuritySection'
+import { LayoutDashboard, PlusCircle, List, Gift, Trophy, Medal, Award, Zap, Loader2, Utensils, RefreshCw, User, Handshake, ShieldCheck } from 'lucide-react'
 
 const STATUS_FILTERS = ['all', 'pending', 'accepted', 'collected', 'completed']
 
@@ -26,7 +28,18 @@ export default function DonorDashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [myDonations, setMyDonations] = useState([])
+  const [ngoRequests, setNgoRequests] = useState([])
   const [activeTab, setActiveTab] = useState('overview')
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('donorTab')
+    if (saved) setActiveTab(saved)
+  }, [])
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    localStorage.setItem('donorTab', tab)
+  }
   const [lastDonation, setLastDonation] = useState(null)
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('cards')
@@ -41,17 +54,31 @@ export default function DonorDashboard() {
     setUser(u)
     userIdRef.current = u._id
     fetchDonations(u._id)
+    
+    const interval = setInterval(() => {
+      fetchDonations(u._id, true)
+    }, 10000)
+    
+    return () => clearInterval(interval)
   }, [router])
 
-  const fetchDonations = async (userId) => {
-    setLoading(true)
+  const fetchDonations = async (userId, silent = false) => {
+    if (!silent) setLoading(true)
     try {
-      const res = await api.get(`/donations?donorId=${userId}`)
-      const list = res.data.donations || []
+      const [donationsRes, requestsRes] = await Promise.all([
+        api.get(`/donations?donorId=${userId}`),
+        api.get('/requests/active'),
+      ])
+      const list = donationsRes.data.donations || []
       setMyDonations(list)
       setLastDonation(list[0] || null)
-    } catch { toast.error('Failed to load donations') }
-    finally { setLoading(false) }
+      setNgoRequests(requestsRes.data.requests || [])
+    } catch { 
+      if (!silent) toast.error('Failed to load donations') 
+    }
+    finally { 
+      if (!silent) setLoading(false) 
+    }
   }
 
   const handleQuickDonate = async () => {
@@ -78,6 +105,16 @@ export default function DonorDashboard() {
     finally { setQuickLoading(false) }
   }
 
+  const fulfillRequest = async (id) => {
+    try {
+      await api.put(`/requests/${id}/fulfill`)
+      toast.success('You have committed to fulfill this request!')
+      fetchDonations(userIdRef.current, true)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to fulfill request')
+    }
+  }
+
   const filteredDonations = statusFilter === 'all' ? myDonations : myDonations.filter(d => d.status === statusFilter)
   const completed = myDonations.filter(d => d.status === 'completed').length
   const pending = myDonations.filter(d => d.status === 'pending').length
@@ -86,8 +123,11 @@ export default function DonorDashboard() {
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'upload', label: 'New Donation', icon: <PlusCircle className="w-4 h-4" /> },
     { id: 'history', label: 'My Donations', icon: <List className="w-4 h-4" /> },
+    { id: 'requests', label: 'NGO Requests', icon: <Handshake className="w-4 h-4" /> },
     { id: 'rewards', label: 'Rewards', icon: <Gift className="w-4 h-4" /> },
     { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" /> },
+    { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
+    { id: 'security', label: 'Security', icon: <ShieldCheck className="w-4 h-4" /> },
   ]
 
   if (!user) return (
@@ -97,7 +137,7 @@ export default function DonorDashboard() {
   )
 
   return (
-    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={setActiveTab}
+    <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={handleTabChange}
       title={`Welcome, ${user.name}`} subtitle="Donor Dashboard">
 
       {/* Overview */}
@@ -266,11 +306,81 @@ export default function DonorDashboard() {
         </div>
       )}
 
+          </div>
+        </div>
+      )}
+
+      {/* NGO Requests */}
+      {activeTab === 'requests' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-green-900">Active NGO Food Requests</h2>
+            <p className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">
+              {ngoRequests.length} Open Requests
+            </p>
+          </div>
+          {ngoRequests.length === 0 ? (
+            <div className="text-center py-24 text-gray-400 flex flex-col items-center border border-dashed border-green-200 rounded-3xl bg-white/40">
+              <Handshake className="w-16 h-16 mb-4 text-green-200" />
+              <p className="text-sm font-medium">No NGOs are currently requesting food</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {ngoRequests.map(r => (
+                <div key={r._id} className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-700">
+                      {r.ngoId?.name?.[0]}
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Needs Food</span>
+                  </div>
+                  <h3 className="text-lg font-black text-gray-800 mb-0.5">{r.ngoId?.name}</h3>
+                  <p className="text-xs font-medium text-gray-500 mb-4">{r.ngoId?.location}</p>
+                  
+                  <div className="p-4 rounded-2xl bg-green-50/50 border border-green-100 mb-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-green-600 mb-1">Quantity Needed</p>
+                    <p className="text-xl font-black text-green-900">{r.quantityNeeded}</p>
+                  </div>
+
+                  <button onClick={() => fulfillRequest(r._id)}
+                    className="w-full bg-green-700 hover:bg-green-800 text-white py-3 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0">
+                    <Handshake className="w-4 h-4" />
+                    Fulfill This Request
+                  </button>
+                  
+                  <div className="mt-4 flex flex-col gap-1">
+                    <p className="text-[10px] font-medium text-gray-400">Contact: {r.ngoId?.phone || r.ngoId?.email}</p>
+                    <p className="text-[10px] font-medium text-gray-400">Posted {new Date(r.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Leaderboard */}
       {activeTab === 'leaderboard' && (
         <div className="max-w-2xl">
           <Leaderboard />
         </div>
+      )}
+
+      {/* Profile */}
+      {activeTab === 'profile' && (
+        <ProfileSection 
+          user={user} 
+          onSuccess={(u) => { 
+            const merged = { ...user, ...u }
+            setUser(merged)
+            localStorage.setItem('user', JSON.stringify(merged))
+          }} 
+        />
+      )}
+
+      {/* Security */}
+      {activeTab === 'security' && (
+        <SecuritySection />
       )}
     </DashboardLayout>
   )

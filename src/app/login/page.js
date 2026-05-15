@@ -26,7 +26,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const res = await api.post('/auth/login', form)
-      saveAuth(res.data.token, res.data.user)
+      saveAuth(res.data.token, res.data.user, res.data.refreshToken)
       toast.success('Welcome back!')
       const role = res.data.user?.role
       if (role === 'admin') router.push('/admin')

@@ -33,6 +33,8 @@ export default function DonationCard({ donation, actionLabel, onAction, showActi
     ? new Date(donation.expiryTime).toLocaleString()
     : '—'
 
+  const acceptedByName = donation.acceptedBy?.name || null
+
   return (
     <div className="bg-white border border-green-200/50 rounded-3xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-green-300 transition-all duration-300 hover:-translate-y-1 p-5 flex flex-col gap-3 group">
       {/* Image */}
@@ -61,8 +63,13 @@ export default function DonationCard({ donation, actionLabel, onAction, showActi
           {expiry}
         </p>
         {donorName && (
-          <p className="text-xs text-gray-400">
-            {donorName}{donorType ? ` • ${donorType}` : ''}
+          <p className="text-xs text-gray-500">
+            Uploaded by: <span className="font-semibold">{donorName}</span>{donorType ? ` (${donorType})` : ''}
+          </p>
+        )}
+        {acceptedByName && (
+          <p className="text-xs text-blue-500 font-medium mt-1">
+            Accepted by: {acceptedByName}
           </p>
         )}
       </div>

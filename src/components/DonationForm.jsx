@@ -85,7 +85,7 @@ export default function DonationForm({ onSuccess }) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Expiry Time *</label>
           <input
-            type="datetime-local" name="expiryTime" value={formData.expiryTime} onChange={handleChange} required
+            type="datetime-local" name="expiryTime" value={formData.expiryTime} onChange={handleChange} required min={new Date().toISOString().slice(0, 16)}
             className="w-full border border-green-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white/50 focus:bg-white transition-all shadow-inner"
           />
         </div>
