@@ -5,13 +5,14 @@ import toast from 'react-hot-toast'
 import { getUser, isLoggedIn } from '../../../utils/auth'
 import api from '../../../utils/api'
 import DashboardLayout from '../../../components/DashboardLayout'
-import DonationCard from '../../../components/DonationCard'
+import DonationCard, { DonationCardSkeleton } from '../../../components/DonationCard'
 import StatusBadge from '../../../components/StatusBadge'
+import { LayoutDashboard, Inbox, ListTodo, CheckSquare, ClipboardList, CheckCircle2, Utensils, Loader2 } from 'lucide-react'
 
 const StatCard = ({ label, value, color }) => (
-  <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-    <p className="text-xs font-semibold uppercase tracking-widest text-muted mb-2">{label}</p>
-    <p className="text-3xl font-extrabold" style={{ color }}>{value}</p>
+  <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+    <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">{label}</p>
+    <p className="text-3xl font-black tracking-tight" style={{ color }}>{value}</p>
   </div>
 )
 
@@ -81,34 +82,15 @@ export default function NgoDashboard() {
   const inProgress = accepted.filter(d => d.status !== 'completed').length
 
   const navItems = [
-    {
-      id: 'overview', label: 'Overview', icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2" /></svg>
-      )
-    },
-    {
-      id: 'available', label: 'Available', icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-      )
-    },
-    {
-      id: 'accepted', label: 'My Accepted', icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-      )
-    },
-    {
-      id: 'history', label: 'Completed', icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      )
-    },
+    { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'available', label: 'Available', icon: <Inbox className="w-4 h-4" /> },
+    { id: 'accepted', label: 'My Accepted', icon: <ListTodo className="w-4 h-4" /> },
+    { id: 'history', label: 'Completed', icon: <CheckSquare className="w-4 h-4" /> },
   ]
 
   if (!user) return (
-    <div className="min-h-screen flex items-center justify-center page-bg">
-      <svg className="animate-spin h-8 w-8" style={{ color: 'var(--accent)' }} viewBox="0 0 24 24" fill="none">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-      </svg>
+    <div className="min-h-screen flex items-center justify-center bg-green-50/50">
+      <Loader2 className="animate-spin h-10 w-10 text-green-600" />
     </div>
   )
 
@@ -127,24 +109,25 @@ export default function NgoDashboard() {
           </div>
 
           {/* Recent available */}
-          <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-primary">Latest Available Donations</p>
-              <button onClick={() => setActiveTab('available')} className="text-xs font-medium hover:underline" style={{ color: 'var(--accent)' }}>
+          <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500">Latest Available Donations</p>
+              <button onClick={() => setActiveTab('available')} className="text-xs font-bold hover:underline text-green-600">
                 View all →
               </button>
             </div>
             {available.slice(0, 3).length === 0 ? (
-              <p className="text-sm text-muted text-center py-4">No pending donations right now</p>
+              <p className="text-sm font-medium text-gray-400 text-center py-4">No pending donations right now</p>
             ) : available.slice(0, 3).map(d => (
-              <div key={d._id} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
+              <div key={d._id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-primary">{d.foodName}</p>
-                  <p className="text-xs text-muted">{d.quantity} · {d.location}</p>
+                  <p className="text-sm font-bold text-gray-800">{d.foodName}</p>
+                  <p className="text-xs font-medium text-gray-500 mt-0.5">{d.quantity} · {d.location}</p>
                 </div>
                 <button onClick={() => acceptDonation(d._id)} disabled={actingOn.has(d._id)}
-                  className="text-xs px-3 py-1.5 rounded-lg text-white font-medium transition disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl text-white text-xs font-bold transition-all duration-300 shadow-[0_4px_14px_0_rgba(34,197,94,0.39)] hover:shadow-[0_6px_20px_rgba(34,197,94,0.23)] hover:-translate-y-0.5 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 flex items-center gap-1.5"
                   style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+                  {actingOn.has(d._id) ? <Loader2 className="animate-spin w-3.5 h-3.5" /> : null}
                   {actingOn.has(d._id) ? '...' : 'Accept'}
                 </button>
               </div>
@@ -152,18 +135,18 @@ export default function NgoDashboard() {
           </div>
 
           {/* In-progress */}
-          <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-primary">In Progress</p>
-              <button onClick={() => setActiveTab('accepted')} className="text-xs font-medium hover:underline" style={{ color: 'var(--accent)' }}>View all →</button>
+          <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500">In Progress</p>
+              <button onClick={() => setActiveTab('accepted')} className="text-xs font-bold hover:underline text-green-600">View all →</button>
             </div>
             {accepted.filter(d => d.status !== 'completed').slice(0, 3).length === 0 ? (
-              <p className="text-sm text-muted text-center py-4">Nothing in progress</p>
+              <p className="text-sm font-medium text-gray-400 text-center py-4">Nothing in progress</p>
             ) : accepted.filter(d => d.status !== 'completed').slice(0, 3).map(d => (
-              <div key={d._id} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
+              <div key={d._id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-primary">{d.foodName}</p>
-                  <p className="text-xs text-muted">{d.quantity}</p>
+                  <p className="text-sm font-bold text-gray-800">{d.foodName}</p>
+                  <p className="text-xs font-medium text-gray-500 mt-0.5">{d.quantity}</p>
                 </div>
                 <StatusBadge status={d.status} />
               </div>
@@ -176,12 +159,12 @@ export default function NgoDashboard() {
       {activeTab === 'available' && (
         loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => <div key={i} className="h-64 rounded-2xl animate-pulse" style={{ backgroundColor: 'var(--bg-card)' }} />)}
+            {[...Array(3)].map((_, i) => <DonationCardSkeleton key={i} />)}
           </div>
         ) : available.length === 0 ? (
-          <div className="text-center py-20 text-muted">
-            <p className="text-4xl mb-3">📭</p>
-            <p className="text-sm">No pending donations available right now</p>
+          <div className="text-center py-24 text-gray-400 flex flex-col items-center">
+            <Inbox className="w-16 h-16 mb-4 text-green-200" />
+            <p className="text-sm font-medium">No pending donations available right now</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -198,40 +181,41 @@ export default function NgoDashboard() {
       {/* Accepted / in-progress */}
       {activeTab === 'accepted' && (
         accepted.filter(d => d.status !== 'completed').length === 0 ? (
-          <div className="text-center py-20 text-muted">
-            <p className="text-4xl mb-3">📋</p>
-            <p className="text-sm">No active donations right now</p>
+          <div className="text-center py-24 text-gray-400 flex flex-col items-center">
+            <ClipboardList className="w-16 h-16 mb-4 text-green-200" />
+            <p className="text-sm font-medium">No active donations right now</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {accepted.filter(d => d.status !== 'completed').map(d => {
               const busy = actingOn.has(d._id)
               return (
-                <div key={d._id} className="rounded-2xl border overflow-hidden transition hover:-translate-y-0.5"
-                  style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                  <div className="w-full h-36 flex items-center justify-center" style={{ backgroundColor: 'var(--bg-hover)' }}>
+                <div key={d._id} className="rounded-3xl border border-green-200/50 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md bg-white/80 backdrop-blur-sm">
+                  <div className="w-full h-40 flex items-center justify-center bg-green-50 border-b border-green-100">
                     {d.image
-                      ? <img src={d.image} alt={d.foodName} className="w-full h-full object-cover" />
-                      : <span className="text-4xl">🍱</span>}
+                      ? <img src={d.image} alt={d.foodName} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
+                      : <Utensils className="w-10 h-10 text-green-300" />}
                   </div>
-                  <div className="p-4 space-y-2">
-                    <h3 className="font-bold text-primary">{d.foodName}</h3>
-                    <p className="text-sm text-secondary">{d.quantity} · {d.location}</p>
-                    <p className="text-xs text-muted">Expires: {d.expiryTime ? new Date(d.expiryTime).toLocaleString() : '—'}</p>
-                    {d.donorId?.name && <p className="text-xs text-muted">Donor: {d.donorId.name}</p>}
-                    <div className="flex items-center justify-between pt-2">
+                  <div className="p-5 space-y-2">
+                    <h3 className="font-bold text-green-900 text-lg leading-tight">{d.foodName}</h3>
+                    <p className="text-sm text-gray-600 font-medium">{d.quantity} · {d.location}</p>
+                    <p className="text-xs text-gray-500">Expires: {d.expiryTime ? new Date(d.expiryTime).toLocaleString() : '—'}</p>
+                    {d.donorId?.name && <p className="text-xs font-medium text-gray-500">Donor: {d.donorId.name}</p>}
+                    <div className="flex items-center justify-between pt-3 mt-1 border-t border-green-100/50">
                       <StatusBadge status={d.status} />
                       {d.status === 'accepted' && (
                         <button onClick={() => updateStatus(d._id, 'collected')} disabled={busy}
-                          className="text-xs px-3 py-1.5 rounded-lg text-white font-medium transition disabled:opacity-50"
+                          className="text-xs px-4 py-2 rounded-xl text-white font-bold transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:shadow-none hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-1.5"
                           style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                          {busy ? <Loader2 className="animate-spin w-3.5 h-3.5" /> : null}
                           {busy ? '...' : 'Mark Collected'}
                         </button>
                       )}
                       {d.status === 'collected' && (
                         <button onClick={() => updateStatus(d._id, 'completed')} disabled={busy}
-                          className="text-xs px-3 py-1.5 rounded-lg text-white font-medium transition disabled:opacity-50"
+                          className="text-xs px-4 py-2 rounded-xl text-white font-bold transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:shadow-none hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-1.5"
                           style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+                          {busy ? <Loader2 className="animate-spin w-3.5 h-3.5" /> : null}
                           {busy ? '...' : 'Mark Completed'}
                         </button>
                       )}
@@ -247,21 +231,20 @@ export default function NgoDashboard() {
       {/* Completed history */}
       {activeTab === 'history' && (
         accepted.filter(d => d.status === 'completed').length === 0 ? (
-          <div className="text-center py-20 text-muted">
-            <p className="text-4xl mb-3">✅</p>
-            <p className="text-sm">No completed donations yet</p>
+          <div className="text-center py-24 text-gray-400 flex flex-col items-center">
+            <CheckCircle2 className="w-16 h-16 mb-4 text-green-200" />
+            <p className="text-sm font-medium">No completed donations yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {accepted.filter(d => d.status === 'completed').map(d => (
-              <div key={d._id} className="rounded-2xl border p-4 space-y-2"
-                style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-primary text-sm">{d.foodName}</h3>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e' }}>Completed</span>
+              <div key={d._id} className="rounded-3xl border border-green-200/50 p-5 space-y-2 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-bold text-green-900 text-base">{d.foodName}</h3>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e' }}>Completed</span>
                 </div>
-                <p className="text-xs text-secondary">{d.quantity} · {d.location}</p>
-                {d.donorId?.name && <p className="text-xs text-muted">Donor: {d.donorId.name}</p>}
+                <p className="text-xs font-medium text-gray-600">{d.quantity} · {d.location}</p>
+                {d.donorId?.name && <p className="text-xs text-gray-500 font-medium pt-1">Donor: {d.donorId.name}</p>}
               </div>
             ))}
           </div>

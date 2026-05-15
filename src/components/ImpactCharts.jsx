@@ -20,7 +20,7 @@ const pieData = [
   { name: 'Raw Produce', value: 30 },
   { name: 'Packaged', value: 25 },
 ]
-const PIE_COLORS = ['#14b8a6', '#f59e0b', '#6366f1']
+const PIE_COLORS = ['#43A047', '#FB8C00', '#66BB6A']
 
 const trendData = [
   { month: 'Jan', donations: 28 },
@@ -34,55 +34,59 @@ const trendData = [
 ]
 
 const tip = {
-  backgroundColor: '#151233',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: '12px',
-  color: '#e2e8f0',
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  backdropFilter: 'blur(8px)',
+  border: '1px solid rgba(200, 230, 201, 0.5)',
+  borderRadius: '16px',
+  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  color: '#1B5E20',
   fontSize: '12px',
+  fontWeight: '600',
+  padding: '8px 12px',
 }
 
 export default function ImpactCharts() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="bg-navy-900 rounded-2xl p-6 border border-white/5 lg:col-span-2">
-        <h3 className="font-bold text-white mb-1">MPI Poverty Rate by State (%)</h3>
-        <p className="text-gray-500 text-xs mb-5">Source: NITI Aayog National MPI 2021</p>
+      <div className="bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-3xl p-6 shadow-sm lg:col-span-2 hover:shadow-md transition-shadow">
+        <h3 className="font-bold text-green-900 text-lg mb-1">MPI Poverty Rate by State (%)</h3>
+        <p className="text-gray-400 text-xs mb-5">Source: NITI Aayog National MPI 2021</p>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={barData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis dataKey="state" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E8F5E9" />
+            <XAxis dataKey="state" tick={{ fontSize: 11, fill: '#78909C' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#78909C' }} axisLine={false} tickLine={false} />
             <Tooltip contentStyle={tip} formatter={(v) => [`${v}%`, 'MPI Rate']} />
-            <Bar dataKey="mpi" fill="#14b8a6" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="mpi" fill="#43A047" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-navy-900 rounded-2xl p-6 border border-white/5">
-        <h3 className="font-bold text-white mb-1">Food Type Distribution</h3>
-        <p className="text-gray-500 text-xs mb-5">RescueBite platform data</p>
+      <div className="bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+        <h3 className="font-bold text-green-900 text-lg mb-1">Food Type Distribution</h3>
+        <p className="text-gray-400 text-xs mb-5">RescueBite platform data</p>
         <ResponsiveContainer width="100%" height={240}>
           <PieChart>
             <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={88} paddingAngle={4} dataKey="value">
               {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
             </Pie>
             <Tooltip contentStyle={tip} formatter={(v) => [`${v}%`]} />
-            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }} />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', color: '#78909C' }} />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-navy-900 rounded-2xl p-6 border border-white/5 lg:col-span-3">
-        <h3 className="font-bold text-white mb-1">Donation Trends (2024)</h3>
-        <p className="text-gray-500 text-xs mb-5">Monthly donations on RescueBite platform</p>
+      <div className="bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-3xl p-6 shadow-sm lg:col-span-3 hover:shadow-md transition-shadow">
+        <h3 className="font-bold text-green-900 text-lg mb-1">Donation Trends (2024)</h3>
+        <p className="text-gray-400 text-xs mb-5">Monthly donations on RescueBite platform</p>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={trendData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E8F5E9" />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#78909C' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#78909C' }} axisLine={false} tickLine={false} />
             <Tooltip contentStyle={tip} />
-            <Line type="monotone" dataKey="donations" stroke="#14b8a6" strokeWidth={2.5}
-              dot={{ r: 4, fill: '#14b8a6', strokeWidth: 0 }} activeDot={{ r: 6, fill: '#14b8a6' }} />
+            <Line type="monotone" dataKey="donations" stroke="#FB8C00" strokeWidth={2.5}
+              dot={{ r: 4, fill: '#FB8C00', strokeWidth: 0 }} activeDot={{ r: 6, fill: '#FB8C00' }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

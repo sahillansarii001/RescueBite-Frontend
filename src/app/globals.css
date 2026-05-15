@@ -13,34 +13,39 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* ── Dark mode (default) ── */
+  /* ── Light Theme (RescueBite Design System) ── */
   :root {
-    --bg-base:     #020617;
-    --bg-surface:  #0f172a;
-    --bg-card:     #1e293b;
-    --bg-hover:    #334155;
-    --border:      rgba(255,255,255,0.07);
-    --border-hover:rgba(255,255,255,0.15);
-    --text-primary:#f1f5f9;
-    --text-secondary:#94a3b8;
-    --text-muted:  #475569;
-    --accent:      #22c55e;
-    --accent-soft: rgba(34,197,94,0.12);
-  }
+    --rb-page-bg: #FFFFFF;
+    --rb-surface: #F1F8E9;
+    --rb-card-bg: #E8F5E9;
+    --rb-accent-bg: #FFF3E0;
+    --rb-primary-300: #A5D6A7;
+    --rb-primary-400: #66BB6A;
+    --rb-primary-600: #43A047;
+    --rb-primary-700: #2E7D32;
+    --rb-primary-900: #1B5E20;
+    --rb-orange-300: #FFCC80;
+    --rb-orange-400: #FFA726;
+    --rb-orange-600: #FB8C00;
+    --rb-orange-800: #E65100;
+    --rb-text-heading: #1B5E20;
+    --rb-text-subheading: #2E7D32;
+    --rb-text-body: #37474F;
+    --rb-text-muted: #78909C;
+    --rb-border-light: #C8E6C9;
+    --rb-border-medium: #A5D6A7;
 
-  /* ── Light mode ── */
-  html:not(.dark) {
-    --bg-base:     #f8fafc;
-    --bg-surface:  #ffffff;
-    --bg-card:     #ffffff;
-    --bg-hover:    #f1f5f9;
-    --border:      rgba(0,0,0,0.08);
-    --border-hover:rgba(0,0,0,0.18);
-    --text-primary:#0f172a;
-    --text-secondary:#475569;
-    --text-muted:  #94a3b8;
-    --accent:      #16a34a;
-    --accent-soft: rgba(22,163,74,0.10);
+    --bg-base:     #FFFFFF;
+    --bg-surface:  #F1F8E9;
+    --bg-card:     #E8F5E9;
+    --bg-hover:    #C8E6C9;
+    --border:      #C8E6C9;
+    --border-hover:#A5D6A7;
+    --text-primary:#1B5E20;
+    --text-secondary:#37474F;
+    --text-muted:  #78909C;
+    --accent:      #2E7D32;
+    --accent-soft: rgba(46,125,50,0.10);
   }
 }
 
@@ -56,20 +61,20 @@
   .text-muted    { color: var(--text-muted); }
 
   .text-gradient {
-    background: linear-gradient(135deg, #22c55e, #d946ef);
+    background: linear-gradient(135deg, #43A047, #FB8C00);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-gradient-warm {
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    background: linear-gradient(135deg, #FB8C00, #E65100);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .hero-glow-green {
-    background: radial-gradient(ellipse at 20% 50%, rgba(34,197,94,0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(217,70,239,0.10) 0%, transparent 60%);
+    background: radial-gradient(ellipse at 20% 50%, rgba(46,125,50,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(251,140,0,0.06) 0%, transparent 60%);
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

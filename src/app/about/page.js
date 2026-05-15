@@ -1,16 +1,17 @@
 'use client'
 import Link from 'next/link'
+import { Sprout, Utensils, Handshake, Bot, Map, Accessibility, Smartphone, Lightbulb, Heart, Search, Zap } from 'lucide-react'
 
 const mission = [
-  { icon: '🌱', title: 'Reduce Food Waste', desc: 'India wastes 68 million tonnes of food annually. We intercept surplus before it reaches landfills.' },
-  { icon: '🍽️', title: 'Fight Hunger', desc: '194 million people in India go hungry every day. Every rescued meal is a direct intervention.' },
-  { icon: '🤝', title: 'Empower Communities', desc: 'We give NGOs the digital tools they need to operate efficiently and scale their impact.' },
+  { icon: <Sprout className="w-6 h-6 text-green-600" />, title: 'Reduce Food Waste', desc: 'India wastes 68 million tonnes of food annually. We intercept surplus before it reaches landfills.' },
+  { icon: <Utensils className="w-6 h-6 text-green-600" />, title: 'Fight Hunger', desc: '194 million people in India go hungry every day. Every rescued meal is a direct intervention.' },
+  { icon: <Handshake className="w-6 h-6 text-green-600" />, title: 'Empower Communities', desc: 'We give NGOs the digital tools they need to operate efficiently and scale their impact.' },
 ]
 const vision = [
-  { icon: '🤖', title: 'AI-Powered Matching', desc: 'Smart algorithms that match donors with the nearest NGO in under 60 seconds.' },
-  { icon: '🗺️', title: '100 Cities by 2026', desc: 'Expanding from 10 cities today to every major urban center across India.' },
-  { icon: '♿', title: 'Universal Accessibility', desc: 'Multi-language support and simplified UX for all literacy levels and devices.' },
-  { icon: '📱', title: 'Mobile-First App', desc: 'A dedicated mobile app for donors and NGOs to manage donations on the go.' },
+  { icon: <Bot className="w-6 h-6 text-green-600" />, title: 'AI-Powered Matching', desc: 'Smart algorithms that match donors with the nearest NGO in under 60 seconds.' },
+  { icon: <Map className="w-6 h-6 text-green-600" />, title: '100 Cities by 2026', desc: 'Expanding from 10 cities today to every major urban center across India.' },
+  { icon: <Accessibility className="w-6 h-6 text-green-600" />, title: 'Universal Accessibility', desc: 'Multi-language support and simplified UX for all literacy levels and devices.' },
+  { icon: <Smartphone className="w-6 h-6 text-green-600" />, title: 'Mobile-First App', desc: 'A dedicated mobile app for donors and NGOs to manage donations on the go.' },
 ]
 const problems = [
   { stat: '194M+', label: 'People go hungry in India', sub: 'FAO 2024' },
@@ -39,16 +40,16 @@ const team = [
   { name: 'Amit Shah', role: 'Head of Growth', avatar: 'AS', bio: 'Growth hacker with experience scaling social impact startups across India.' },
 ]
 const values = [
-  { icon: '💡', title: 'Innovation', desc: 'We use technology to solve age-old problems in new, scalable ways.' },
-  { icon: '❤️', title: 'Compassion', desc: 'Every decision we make is guided by empathy for those who go hungry.' },
-  { icon: '🔍', title: 'Transparency', desc: 'Every donation is tracked, verified, and visible to all stakeholders.' },
-  { icon: '⚡', title: 'Speed', desc: 'Food rescue is time-sensitive. We move fast so food does not go to waste.' },
-  { icon: '🌱', title: 'Sustainability', desc: 'We build for the long term — for people, communities, and the planet.' },
-  { icon: '🤝', title: 'Collaboration', desc: 'We believe the best solutions come from working together across sectors.' },
+  { icon: <Lightbulb className="w-6 h-6 text-green-600" />, title: 'Innovation', desc: 'We use technology to solve age-old problems in new, scalable ways.' },
+  { icon: <Heart className="w-6 h-6 text-green-600" />, title: 'Compassion', desc: 'Every decision we make is guided by empathy for those who go hungry.' },
+  { icon: <Search className="w-6 h-6 text-green-600" />, title: 'Transparency', desc: 'Every donation is tracked, verified, and visible to all stakeholders.' },
+  { icon: <Zap className="w-6 h-6 text-green-600" />, title: 'Speed', desc: 'Food rescue is time-sensitive. We move fast so food does not go to waste.' },
+  { icon: <Sprout className="w-6 h-6 text-green-600" />, title: 'Sustainability', desc: 'We build for the long term — for people, communities, and the planet.' },
+  { icon: <Handshake className="w-6 h-6 text-green-600" />, title: 'Collaboration', desc: 'We believe the best solutions come from working together across sectors.' },
 ]
 
 const Section = ({ children, alt }) => (
-  <section className="py-24 px-6" style={{ backgroundColor: alt ? 'var(--bg-surface)' : 'var(--bg-base)' }}>
+  <section className={`py-24 px-6 ${alt ? 'bg-green-50' : 'bg-white'}`}>
     {children}
   </section>
 )
@@ -58,12 +59,12 @@ export default function AboutPage() {
     <main className="overflow-x-hidden page-bg">
 
       {/* Hero */}
-      <section className="relative py-32 px-6 text-center overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--bg-base) 0%, #0d2818 50%, var(--bg-base) 100%)' }}>
+      <section className="relative py-32 px-6 text-center overflow-hidden bg-gradient-to-br from-green-800 to-green-900">
         <div className="absolute top-1/3 left-1/4 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%)' }} />
         <div className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-2 border text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase" style={{ backgroundColor: 'var(--accent-soft)', borderColor: 'var(--accent)', color: 'var(--accent)' }}>Our Story</span>
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-primary">About <span className="text-gradient">RescueBite</span></h1>
-          <p className="mt-6 text-lg max-w-xl mx-auto leading-relaxed text-secondary">We started with a simple belief — no good food should go to waste while people go hungry. That belief became a platform.</p>
+          <span className="inline-flex items-center gap-2 border border-green-400 text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase bg-green-800/50 text-green-200">Our Story</span>
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-white">About <span className="text-orange-400">RescueBite</span></h1>
+          <p className="mt-6 text-lg max-w-xl mx-auto leading-relaxed text-green-100">We started with a simple belief — no good food should go to waste while people go hungry. That belief became a platform.</p>
         </div>
       </section>
 
@@ -77,10 +78,10 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {problems.map((p) => (
-              <div key={p.stat} className="p-6 rounded-2xl border text-center transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <p className="text-3xl md:text-4xl font-extrabold text-gradient-warm">{p.stat}</p>
-                <p className="text-sm mt-2 leading-snug text-secondary">{p.label}</p>
-                <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full text-muted" style={{ backgroundColor: 'var(--bg-hover)' }}>{p.sub}</span>
+              <div key={p.stat} className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
+                <p className="text-3xl md:text-4xl font-extrabold text-orange-500">{p.stat}</p>
+                <p className="text-sm mt-2 leading-snug font-bold text-green-900">{p.label}</p>
+                <span className="inline-block mt-3 text-[11px] font-bold px-3 py-1 rounded-full bg-green-50 text-green-700 tracking-wider uppercase">{p.sub}</span>
               </div>
             ))}
           </div>
@@ -102,11 +103,11 @@ export default function AboutPage() {
             </div>
             <div className="grid grid-cols-1 gap-4">
               {mission.map((m) => (
-                <div key={m.title} className="flex gap-4 p-5 rounded-2xl border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: 'var(--accent-soft)' }}>{m.icon}</div>
+                <div key={m.title} className="flex gap-5 p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-green-50">{m.icon}</div>
                   <div>
-                    <h3 className="font-bold text-sm text-primary">{m.title}</h3>
-                    <p className="text-sm mt-1 leading-relaxed text-secondary">{m.desc}</p>
+                    <h3 className="font-bold text-lg text-green-900">{m.title}</h3>
+                    <p className="text-sm mt-1.5 leading-relaxed text-gray-600 font-medium">{m.desc}</p>
                   </div>
                 </div>
               ))}
@@ -124,10 +125,10 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {values.map((v) => (
-              <div key={v.title} className="p-6 rounded-2xl border transition hover:-translate-y-1" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4" style={{ backgroundColor: 'var(--accent-soft)' }}>{v.icon}</div>
-                <h3 className="font-bold mb-2 text-primary">{v.title}</h3>
-                <p className="text-sm leading-relaxed text-secondary">{v.desc}</p>
+              <div key={v.title} className="p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-green-50">{v.icon}</div>
+                <h3 className="font-bold text-lg mb-2 text-green-900">{v.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{v.desc}</p>
               </div>
             ))}
           </div>
@@ -146,10 +147,10 @@ export default function AboutPage() {
             <div className="flex flex-col gap-8">
               {timeline.map((t) => (
                 <div key={t.year} className="flex gap-6 items-start pl-4">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 relative z-10" style={{ backgroundColor: 'var(--accent)', boxShadow: '0 0 16px rgba(34,197,94,0.3)' }}>{t.year.slice(2)}</div>
-                  <div className="p-5 rounded-2xl border flex-1 transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                    <span className="font-bold text-sm" style={{ color: 'var(--accent)' }}>{t.year}</span>
-                    <p className="text-sm mt-1 leading-relaxed text-secondary">{t.event}</p>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 relative z-10 bg-green-600 shadow-[0_0_16px_rgba(22,163,74,0.4)]">{t.year.slice(2)}</div>
+                  <div className="p-6 rounded-3xl border border-green-200/50 flex-1 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-300">
+                    <span className="font-bold text-lg text-green-600">{t.year}</span>
+                    <p className="text-sm mt-2 leading-relaxed text-gray-600 font-medium">{t.event}</p>
                   </div>
                 </div>
               ))}
@@ -168,11 +169,11 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {team.map((m) => (
-              <div key={m.name} className="p-6 rounded-2xl border transition hover:-translate-y-1" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-extrabold text-lg mb-4" style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}>{m.avatar}</div>
-                <h3 className="font-bold text-primary">{m.name}</h3>
-                <p className="text-xs font-semibold mt-0.5 mb-3" style={{ color: 'var(--accent)' }}>{m.role}</p>
-                <p className="text-sm leading-relaxed text-secondary">{m.bio}</p>
+              <div key={m.name} className="p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-xl mb-5 bg-green-50 text-green-600">{m.avatar}</div>
+                <h3 className="font-bold text-lg text-green-900">{m.name}</h3>
+                <p className="text-[11px] font-bold uppercase tracking-widest mt-1 mb-4 text-green-600">{m.role}</p>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{m.bio}</p>
               </div>
             ))}
           </div>
@@ -189,10 +190,10 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {vision.map((v) => (
-              <div key={v.title} className="p-6 rounded-2xl border transition hover:-translate-y-1" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4" style={{ backgroundColor: 'var(--accent-soft)' }}>{v.icon}</div>
-                <h3 className="font-bold mb-2 text-primary">{v.title}</h3>
-                <p className="text-sm leading-relaxed text-secondary">{v.desc}</p>
+              <div key={v.title} className="p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-green-50">{v.icon}</div>
+                <h3 className="font-bold text-lg mb-3 text-green-900">{v.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{v.desc}</p>
               </div>
             ))}
           </div>
@@ -209,10 +210,10 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {sdgs.map((s) => (
-              <div key={s.num} className="p-6 rounded-2xl border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: `${s.accent}30` }}>
-                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: s.accent }}>{s.num}</span>
-                <h3 className="font-extrabold text-base mt-2 mb-3 text-primary">{s.title}</h3>
-                <p className="text-xs leading-relaxed text-secondary">{s.desc}</p>
+              <div key={s.num} className="p-8 rounded-3xl border bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300" style={{ borderColor: `${s.accent}40` }}>
+                <span className="text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full" style={{ color: s.accent, backgroundColor: `${s.accent}15` }}>{s.num}</span>
+                <h3 className="font-bold text-lg mt-5 mb-3 text-green-900">{s.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{s.desc}</p>
               </div>
             ))}
           </div>

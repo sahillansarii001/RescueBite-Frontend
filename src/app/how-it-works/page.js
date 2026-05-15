@@ -1,19 +1,20 @@
 'use client'
 import Link from 'next/link'
+import { Lock, Camera, Bell, CheckCircle2, Car, BarChart3, Home, Handshake, UtensilsCrossed, Shield, Package, Star, ArrowRight } from 'lucide-react'
 
 const workflow = [
-  { num: '01', icon: '🔐', title: 'Create Your Account', desc: 'Sign up as a Donor, NGO, or Restaurant in under 2 minutes. NGOs go through a manual review for quality assurance.' },
-  { num: '02', icon: '📸', title: 'Post Surplus Food', desc: 'Fill in food name, quantity, type, expiry time, pickup location, and an optional photo.' },
-  { num: '03', icon: '🔔', title: 'NGOs Get Notified', desc: 'All verified NGOs within the pickup radius are instantly notified and can accept from their dashboard.' },
-  { num: '04', icon: '✅', title: 'Donation Accepted', desc: 'An NGO accepts the donation. The donor is notified immediately and pickup is confirmed.' },
-  { num: '05', icon: '🚗', title: 'Food Collected', desc: 'The NGO team arrives at the donor location and collects the food. Status updates in real time.' },
-  { num: '06', icon: '📊', title: 'Impact Recorded', desc: 'Meals saved, points earned, and badges unlocked are updated automatically on the leaderboard.' },
+  { num: '01', icon: <Lock className="w-5 h-5" />, title: 'Create Your Account', desc: 'Sign up as a Donor, NGO, or Restaurant in under 2 minutes. NGOs go through a manual review for quality assurance.' },
+  { num: '02', icon: <Camera className="w-5 h-5" />, title: 'Post Surplus Food', desc: 'Fill in food name, quantity, type, expiry time, pickup location, and an optional photo.' },
+  { num: '03', icon: <Bell className="w-5 h-5" />, title: 'NGOs Get Notified', desc: 'All verified NGOs within the pickup radius are instantly notified and can accept from their dashboard.' },
+  { num: '04', icon: <CheckCircle2 className="w-5 h-5" />, title: 'Donation Accepted', desc: 'An NGO accepts the donation. The donor is notified immediately and pickup is confirmed.' },
+  { num: '05', icon: <Car className="w-5 h-5" />, title: 'Food Collected', desc: 'The NGO team arrives at the donor location and collects the food. Status updates in real time.' },
+  { num: '06', icon: <BarChart3 className="w-5 h-5" />, title: 'Impact Recorded', desc: 'Meals saved, points earned, and badges unlocked are updated automatically on the leaderboard.' },
 ]
 const roles = [
-  { icon: '🏠', title: 'Donor', accent: '#22c55e', points: ['Register and create a donor profile', 'Upload surplus food with details and photo', 'Track donation status in real time', 'Earn points and badges for every donation', 'Climb the leaderboard and unlock rewards'] },
-  { icon: '🤝', title: 'NGO', accent: '#3b82f6', points: ['Register and get verified by the RescueBite team', 'Browse available donations nearby on the dashboard', 'Accept and collect donations with one click', 'Mark donations as collected and completed', 'View analytics on food received and distributed'] },
-  { icon: '🍽️', title: 'Restaurant', accent: '#f59e0b', points: ['Register as a restaurant or hotel donor', 'Schedule recurring daily surplus donations', 'Get auto-matched with the nearest NGO', 'Track all past and active donations', 'Receive impact certificates for CSR reporting'] },
-  { icon: '🛡️', title: 'Admin', accent: '#d946ef', points: ['Full platform visibility and control', 'Manage and verify all users and NGOs', 'View platform-wide analytics and trends', 'Moderate donations and resolve disputes', 'Manage user roles, points, and badges'] },
+  { icon: <Home className="w-6 h-6" />, title: 'Donor', accent: '#22c55e', points: ['Register and create a donor profile', 'Upload surplus food with details and photo', 'Track donation status in real time', 'Earn points and badges for every donation', 'Climb the leaderboard and unlock rewards'] },
+  { icon: <Handshake className="w-6 h-6" />, title: 'NGO', accent: '#3b82f6', points: ['Register and get verified by the RescueBite team', 'Browse available donations nearby on the dashboard', 'Accept and collect donations with one click', 'Mark donations as collected and completed', 'View analytics on food received and distributed'] },
+  { icon: <UtensilsCrossed className="w-6 h-6" />, title: 'Restaurant', accent: '#f59e0b', points: ['Register as a restaurant or hotel donor', 'Schedule recurring daily surplus donations', 'Get auto-matched with the nearest NGO', 'Track all past and active donations', 'Receive impact certificates for CSR reporting'] },
+  { icon: <Shield className="w-6 h-6" />, title: 'Admin', accent: '#d946ef', points: ['Full platform visibility and control', 'Manage and verify all users and NGOs', 'View platform-wide analytics and trends', 'Moderate donations and resolve disputes', 'Manage user roles, points, and badges'] },
 ]
 const faqs = [
   { q: 'Is there a minimum quantity for donation?', a: 'No minimum at all. Even a single home-cooked meal counts and is welcome on the platform.' },
@@ -33,7 +34,7 @@ const benefits = [
 ]
 
 const S = ({ children, alt }) => (
-  <section className="py-24 px-6" style={{ backgroundColor: alt ? 'var(--bg-surface)' : 'var(--bg-base)' }}>
+  <section className={`py-24 px-6 ${alt ? 'bg-green-50/50' : 'bg-white'}`}>
     {children}
   </section>
 )
@@ -42,12 +43,12 @@ export default function HowItWorksPage() {
   return (
     <main className="overflow-x-hidden page-bg">
 
-      <section className="relative py-32 px-6 text-center overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--bg-base) 0%, #0d2818 50%, var(--bg-base) 100%)' }}>
+      <section className="relative py-32 px-6 text-center overflow-hidden bg-gradient-to-br from-green-800 to-green-900">
         <div className="absolute top-1/3 right-1/4 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%)' }} />
         <div className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-2 border text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase" style={{ backgroundColor: 'var(--accent-soft)', borderColor: 'var(--accent)', color: 'var(--accent)' }}>Simple. Fast. Impactful.</span>
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-primary">How <span className="text-gradient">RescueBite</span> Works</h1>
-          <p className="mt-6 text-lg max-w-xl mx-auto leading-relaxed text-secondary">From surplus food to a rescued meal — our platform makes the entire process seamless for everyone involved.</p>
+          <span className="inline-flex items-center gap-2 border border-green-400 text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase bg-green-800/50 text-green-200">Simple. Fast. Impactful.</span>
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-white">How <span className="text-orange-400">RescueBite</span> Works</h1>
+          <p className="mt-6 text-lg max-w-xl mx-auto leading-relaxed text-green-100">From surplus food to a rescued meal — our platform makes the entire process seamless for everyone involved.</p>
         </div>
       </section>
 
@@ -59,11 +60,11 @@ export default function HowItWorksPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {workflow.map((w) => (
-              <div key={w.num} className="flex gap-5 p-6 rounded-2xl border transition hover:-translate-y-0.5" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-extrabold text-sm shrink-0 shadow-lg" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 4px 16px rgba(34,197,94,0.2)' }}>{w.num}</div>
+              <div key={w.num} className="flex gap-5 p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-extrabold text-lg shrink-0 shadow-[0_4px_16px_rgba(22,163,74,0.3)]" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>{w.num}</div>
                 <div>
-                  <div className="flex items-center gap-2 mb-1"><span className="text-lg">{w.icon}</span><h3 className="font-bold text-sm text-primary">{w.title}</h3></div>
-                  <p className="text-sm leading-relaxed text-secondary">{w.desc}</p>
+                  <div className="flex items-center gap-3 mb-2"><span className="text-green-600 bg-green-50 p-2 rounded-xl">{w.icon}</span><h3 className="font-bold text-base text-green-900">{w.title}</h3></div>
+                  <p className="text-sm leading-relaxed text-gray-600 font-medium">{w.desc}</p>
                 </div>
               </div>
             ))}
@@ -77,14 +78,14 @@ export default function HowItWorksPage() {
             <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>System Flow</span>
             <h2 className="text-4xl font-extrabold mt-3 text-primary">Platform Flow Diagram</h2>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-3">
-            {[{icon:'🔐',label:'Register'},{icon:'📦',label:'Upload Food'},{icon:'✅',label:'NGO Accepts'},{icon:'🚗',label:'Collected'},{icon:'📊',label:'Impact Updated'}].map((f, i, arr) => (
-              <div key={f.label} className="flex items-center gap-3">
-                <div className="rounded-2xl px-6 py-4 text-center min-w-[110px] border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                  <span className="text-2xl block">{f.icon}</span>
-                  <p className="text-xs font-semibold mt-2 text-secondary">{f.label}</p>
+          <div className="flex flex-wrap justify-center items-center gap-4">
+            {[{icon:<Lock className="w-6 h-6" />,label:'Register'},{icon:<Package className="w-6 h-6" />,label:'Upload Food'},{icon:<CheckCircle2 className="w-6 h-6" />,label:'NGO Accepts'},{icon:<Car className="w-6 h-6" />,label:'Collected'},{icon:<BarChart3 className="w-6 h-6" />,label:'Impact Updated'}].map((f, i, arr) => (
+              <div key={f.label} className="flex items-center gap-4">
+                <div className="rounded-3xl px-8 py-5 text-center min-w-[140px] border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
+                  <span className="flex justify-center text-green-600 bg-green-50 w-12 h-12 rounded-xl items-center mx-auto">{f.icon}</span>
+                  <p className="text-xs font-bold mt-3 text-green-900 uppercase tracking-wider">{f.label}</p>
                 </div>
-                {i < arr.length - 1 && <span className="font-bold text-xl hidden sm:block" style={{ color: 'var(--accent)' }}>→</span>}
+                {i < arr.length - 1 && <ArrowRight className="w-6 h-6 text-green-400 hidden sm:block" />}
               </div>
             ))}
           </div>
@@ -99,15 +100,15 @@ export default function HowItWorksPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {roles.map((r) => (
-              <div key={r.title} className="p-6 rounded-2xl border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="text-2xl">{r.icon}</span>
-                  <span className="text-sm font-bold px-3 py-1 rounded-full border" style={{ color: r.accent, backgroundColor: `${r.accent}15`, borderColor: `${r.accent}30` }}>{r.title}</span>
+              <div key={r.title} className="p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="p-3 rounded-2xl" style={{ backgroundColor: `${r.accent}15`, color: r.accent }}>{r.icon}</span>
+                  <span className="text-[11px] font-bold px-3 py-1 rounded-full border uppercase tracking-widest" style={{ color: r.accent, backgroundColor: `${r.accent}10`, borderColor: `${r.accent}30` }}>{r.title}</span>
                 </div>
-                <ul className="flex flex-col gap-2.5">
+                <ul className="flex flex-col gap-3">
                   {r.points.map((p) => (
-                    <li key={p} className="flex items-start gap-2.5 text-sm text-secondary">
-                      <span className="mt-0.5 shrink-0 font-bold" style={{ color: 'var(--accent)' }}>✓</span>{p}
+                    <li key={p} className="flex items-start gap-3 text-sm text-gray-600 font-medium">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" style={{ color: r.accent }} />{p}
                     </li>
                   ))}
                 </ul>
@@ -125,10 +126,12 @@ export default function HowItWorksPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {benefits.map((b) => (
-              <div key={b.title} className="p-6 rounded-2xl border text-center transition hover:-translate-y-1" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4" style={{ backgroundColor: 'rgba(245,158,11,0.1)' }}>⭐</div>
-                <h3 className="font-bold mb-2 text-primary">{b.title}</h3>
-                <p className="text-sm leading-relaxed text-secondary">{b.desc}</p>
+              <div key={b.title} className="p-8 rounded-3xl border border-green-200/50 text-center bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-amber-50">
+                  <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
+                </div>
+                <h3 className="font-bold mb-3 text-green-900 text-lg">{b.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{b.desc}</p>
               </div>
             ))}
           </div>
@@ -143,9 +146,9 @@ export default function HowItWorksPage() {
           </div>
           <div className="flex flex-col gap-4">
             {faqs.map((f) => (
-              <div key={f.q} className="p-6 rounded-2xl border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <p className="font-semibold text-sm mb-2 text-primary">{f.q}</p>
-                <p className="text-sm leading-relaxed text-secondary">{f.a}</p>
+              <div key={f.q} className="p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300">
+                <p className="font-bold text-base mb-3 text-green-900">{f.q}</p>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{f.a}</p>
               </div>
             ))}
           </div>

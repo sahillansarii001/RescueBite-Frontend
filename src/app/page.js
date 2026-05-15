@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { isLoggedIn } from '../utils/auth'
+import { Zap, MapPin, Building2, BarChart3, Lock, Globe2, Home, UtensilsCrossed, PartyPopper, Store, Star } from 'lucide-react'
 
 const stats = [
   { value: '12,000+', label: 'Meals Rescued' },
@@ -11,19 +12,19 @@ const stats = [
 ]
 
 const features = [
-  { icon: '⚡', title: 'Instant Matching', desc: 'Connects donors with the nearest verified NGO in real time — no delays, no waste.' },
-  { icon: '📍', title: 'Live Tracking', desc: 'Track every donation from upload to collection with live status updates.' },
-  { icon: '🏢', title: 'Verified NGO Network', desc: 'Every NGO is manually verified. You know your food reaches the right hands.' },
-  { icon: '📊', title: 'Impact Analytics', desc: 'See your personal impact — meals saved, points earned, badges unlocked.' },
-  { icon: '🔒', title: 'Secure & Transparent', desc: 'End-to-end donation tracking with full audit trail. Every action is logged.' },
-  { icon: '🌍', title: 'SDG Aligned', desc: 'Contributing to UN SDG 1 (No Poverty), SDG 2 (Zero Hunger), and SDG 12.' },
+  { icon: <Zap className="w-6 h-6 text-green-600" />, title: 'Instant Matching', desc: 'Connects donors with the nearest verified NGO in real time — no delays, no waste.' },
+  { icon: <MapPin className="w-6 h-6 text-green-600" />, title: 'Live Tracking', desc: 'Track every donation from upload to collection with live status updates.' },
+  { icon: <Building2 className="w-6 h-6 text-green-600" />, title: 'Verified NGO Network', desc: 'Every NGO is manually verified. You know your food reaches the right hands.' },
+  { icon: <BarChart3 className="w-6 h-6 text-green-600" />, title: 'Impact Analytics', desc: 'See your personal impact — meals saved, points earned, badges unlocked.' },
+  { icon: <Lock className="w-6 h-6 text-green-600" />, title: 'Secure & Transparent', desc: 'End-to-end donation tracking with full audit trail. Every action is logged.' },
+  { icon: <Globe2 className="w-6 h-6 text-green-600" />, title: 'SDG Aligned', desc: 'Contributing to UN SDG 1 (No Poverty), SDG 2 (Zero Hunger), and SDG 12.' },
 ]
 
 const donors = [
-  { icon: '🏠', title: 'Households', desc: 'Leftover home-cooked meals that deserve a second life.' },
-  { icon: '🍽️', title: 'Restaurants & Hotels', desc: 'Daily surplus meals — schedule recurring pickups effortlessly.' },
-  { icon: '💒', title: 'Events & Banquets', desc: 'Post-event bulk food rescued before it goes to waste.' },
-  { icon: '🏪', title: 'Grocery & Retail', desc: 'Near-expiry packaged goods redistributed to communities.' },
+  { icon: <Home className="w-8 h-8 text-orange-500" />, title: 'Households', desc: 'Leftover home-cooked meals that deserve a second life.' },
+  { icon: <UtensilsCrossed className="w-8 h-8 text-orange-500" />, title: 'Restaurants & Hotels', desc: 'Daily surplus meals — schedule recurring pickups effortlessly.' },
+  { icon: <PartyPopper className="w-8 h-8 text-orange-500" />, title: 'Events & Banquets', desc: 'Post-event bulk food rescued before it goes to waste.' },
+  { icon: <Store className="w-8 h-8 text-orange-500" />, title: 'Grocery & Retail', desc: 'Near-expiry packaged goods redistributed to communities.' },
 ]
 
 const steps = [
@@ -51,69 +52,61 @@ export default function HomePage() {
   useEffect(() => { isLoggedIn() }, [])
 
   return (
-    <main className="overflow-x-hidden page-bg">
+    <main className="overflow-x-hidden bg-white">
 
       {/* Hero */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden hero-glow-green" style={{ backgroundColor: 'var(--bg-base)' }}>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(217,70,239,0.08) 0%, transparent 70%)' }} />
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden bg-gradient-to-br from-green-800 to-green-900">
         <div className="relative z-10 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 border text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase" style={{ backgroundColor: 'var(--accent-soft)', borderColor: 'var(--accent)', color: 'var(--accent)' }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--accent)' }} />
+          <div className="inline-flex items-center gap-2 border border-green-400 text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase bg-green-800/50 text-green-200">
+            <span className="w-2 h-2 rounded-full animate-pulse bg-green-400" />
             Fighting Hunger Across India
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight text-primary">
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
             Transform Surplus Food
             <br />
-            <span className="text-gradient">Into Social Impact</span>
+            <span className="text-orange-400">Into Social Impact</span>
           </h1>
-          <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed text-secondary">
+          <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed text-green-100">
             RescueBite connects food donors, verified NGOs, and communities to rescue surplus food — powered by technology, driven by compassion.
           </p>
           <div className="mt-10 flex flex-wrap gap-4 justify-center">
-            <Link href="/signup" className="px-8 py-4 rounded-xl text-white font-semibold text-base transition shadow-xl hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 8px 32px rgba(34,197,94,0.25)' }}>
+            <Link href="/signup" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition">
               Start Donating Free →
             </Link>
-            <Link href="/how-it-works" className="px-8 py-4 rounded-xl font-semibold text-base transition hover:-translate-y-0.5 border" style={{ borderColor: 'var(--border-hover)', color: 'var(--text-primary)' }}>
+            <Link href="/how-it-works" className="border-2 border-white text-white hover:bg-white hover:text-green-800 px-8 py-3 rounded-xl font-semibold transition">
               See How It Works
             </Link>
           </div>
-          <p className="mt-6 text-sm" style={{ color: 'var(--text-muted)' }}>No minimum quantity · Free to join · Instant NGO matching</p>
-        </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" style={{ color: 'var(--text-muted)' }}>
-          <span className="text-xs tracking-widest uppercase">Scroll</span>
-          <div className="w-px h-8" style={{ background: 'linear-gradient(to bottom, var(--text-muted), transparent)' }} />
+          <p className="mt-6 text-sm text-green-200">No minimum quantity · Free to join · Instant NGO matching</p>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="border-y py-14" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+      <section className="bg-green-800 py-14">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-6 text-center">
           {stats.map((s) => (
             <div key={s.label}>
-              <p className="text-3xl md:text-4xl font-extrabold text-gradient">{s.value}</p>
-              <p className="text-sm mt-1 text-secondary">{s.label}</p>
+              <p className="text-3xl md:text-4xl font-bold text-orange-400">{s.value}</p>
+              <p className="text-sm mt-1 text-green-200">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-24 px-6 page-bg">
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Platform Features</span>
-            <h2 className="text-4xl md:text-5xl font-extrabold mt-3 text-primary">Built for Real Impact</h2>
-            <p className="mt-4 max-w-xl mx-auto text-secondary">Every feature is designed to make food rescue faster, safer, and more transparent.</p>
+            <span className="font-semibold text-sm uppercase tracking-widest text-green-700">Platform Features</span>
+            <h2 className="text-4xl font-bold mt-3 text-green-900">Built for Real Impact</h2>
+            <p className="mt-4 max-w-xl mx-auto text-gray-500">Every feature is designed to make food rescue faster, safer, and more transparent.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f) => (
-              <div key={f.title} className="group p-6 rounded-2xl border transition-all duration-300 hover:-translate-y-1 cursor-default" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5" style={{ backgroundColor: 'var(--accent-soft)' }}>{f.icon}</div>
-                <h3 className="font-bold text-base mb-2 text-primary">{f.title}</h3>
-                <p className="text-sm leading-relaxed text-secondary">{f.desc}</p>
+              <div key={f.title} className="group p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-green-300 hover:-translate-y-1 transition-all duration-300 cursor-default">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-green-50 group-hover:bg-green-100 transition-colors">{f.icon}</div>
+                <h3 className="font-bold text-lg mb-3 text-green-900">{f.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -121,21 +114,19 @@ export default function HomePage() {
       </section>
 
       {/* Who Can Donate */}
-      <section className="py-24 px-6" style={{ backgroundColor: 'var(--bg-surface)' }}>
+      <section className="py-24 px-6 bg-green-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-semibold text-sm uppercase tracking-widest text-amber-500">Donors</span>
-            <h2 className="text-4xl md:text-5xl font-extrabold mt-3 text-primary">Who Can Donate?</h2>
-            <p className="mt-4 text-secondary">Anyone with surplus food is welcome — no minimum, no barriers.</p>
+            <span className="font-semibold text-sm uppercase tracking-widest text-orange-600">Donors</span>
+            <h2 className="text-4xl font-bold mt-3 text-green-900">Who Can Donate?</h2>
+            <p className="mt-4 text-gray-500">Anyone with surplus food is welcome — no minimum, no barriers.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {donors.map((d) => (
-              <div key={d.title} className="p-6 rounded-2xl border text-center transition-all hover:-translate-y-1 cursor-default" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = '#f59e0b'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4" style={{ backgroundColor: 'rgba(245,158,11,0.1)' }}>{d.icon}</div>
-                <h3 className="font-bold mb-2 text-primary">{d.title}</h3>
-                <p className="text-sm leading-relaxed text-secondary">{d.desc}</p>
+              <div key={d.title} className="p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 hover:border-green-300 transition-all duration-300 cursor-default">
+                <div className="mb-6 flex justify-center">{d.icon}</div>
+                <h3 className="font-bold text-xl text-green-900 mb-3">{d.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">{d.desc}</p>
               </div>
             ))}
           </div>
@@ -143,25 +134,25 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 px-6 page-bg">
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Process</span>
-            <h2 className="text-4xl md:text-5xl font-extrabold mt-3 text-primary">How It Works</h2>
-            <p className="mt-4 text-secondary">Four simple steps from surplus food to rescued meal.</p>
+            <span className="font-semibold text-sm uppercase tracking-widest text-green-700">Process</span>
+            <h2 className="text-4xl font-bold mt-3 text-green-900">How It Works</h2>
+            <p className="mt-4 text-gray-500">Four simple steps from surplus food to rescued meal.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
             {steps.map((s, i) => (
               <div key={s.num} className="relative text-center">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-extrabold text-lg mx-auto mb-4 shadow-lg" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 4px 20px rgba(34,197,94,0.2)' }}>{s.num}</div>
-                {i < steps.length - 1 && <div className="hidden md:block absolute top-7 left-[calc(50%+28px)] right-0 h-px" style={{ background: 'linear-gradient(to right, rgba(34,197,94,0.4), transparent)' }} />}
-                <h3 className="font-bold mb-2 text-primary">{s.title}</h3>
-                <p className="text-sm leading-relaxed text-secondary">{s.desc}</p>
+                <div className="bg-green-700 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold mx-auto mb-4">{s.num}</div>
+                {i < steps.length - 1 && <div className="hidden md:block absolute top-5 left-[calc(50%+28px)] right-0 border-t-2 border-dashed border-green-300" />}
+                <h3 className="font-semibold mb-2 text-green-800">{s.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-500">{s.desc}</p>
               </div>
             ))}
           </div>
           <div className="text-center mt-12">
-            <Link href="/how-it-works" className="inline-flex items-center gap-2 font-semibold text-sm transition hover:opacity-80" style={{ color: 'var(--accent)' }}>
+            <Link href="/how-it-works" className="inline-flex items-center gap-2 font-semibold text-sm transition text-green-700 hover:text-green-900 underline">
               View full workflow →
             </Link>
           </div>
@@ -169,14 +160,12 @@ export default function HomePage() {
       </section>
 
       {/* Partners */}
-      <section className="py-14 px-6 border-y" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+      <section className="py-14 px-6 bg-green-50 border-y border-green-200">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-sm uppercase tracking-widest mb-8 text-muted">Trusted by organizations across India</p>
+          <p className="text-sm uppercase tracking-widest mb-8 text-gray-400">Trusted by organizations across India</p>
           <div className="flex flex-wrap justify-center gap-4">
             {partners.map((p) => (
-              <span key={p} className="text-sm font-medium px-4 py-2 rounded-full border transition cursor-default text-secondary" style={{ borderColor: 'var(--border)' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
+              <span key={p} className="text-sm font-medium px-4 py-2 rounded-full border border-green-200 text-gray-600 hover:border-green-400 hover:text-green-700 transition cursor-default">
                 {p}
               </span>
             ))}
@@ -185,22 +174,22 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 px-6 page-bg">
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-semibold text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Testimonials</span>
-            <h2 className="text-4xl md:text-5xl font-extrabold mt-3 text-primary">What People Say</h2>
+            <span className="font-semibold text-sm uppercase tracking-widest text-green-700">Testimonials</span>
+            <h2 className="text-4xl font-bold mt-3 text-green-900">What People Say</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((t) => (
-              <div key={t.name} className="p-6 rounded-2xl border flex flex-col gap-4 transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="flex gap-1">{[...Array(5)].map((_, i) => <span key={i} className="text-amber-400 text-sm">★</span>)}</div>
-                <p className="text-sm leading-relaxed italic text-secondary">&ldquo;{t.quote}&rdquo;</p>
-                <div className="mt-auto pt-4 border-t flex items-center gap-3" style={{ borderColor: 'var(--border)' }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}>{t.avatar}</div>
+              <div key={t.name} className="p-8 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm flex flex-col gap-5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300">
+                <div className="flex gap-1">{[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-orange-400 text-orange-400" />)}</div>
+                <p className="text-sm leading-relaxed italic text-gray-600 font-medium">&ldquo;{t.quote}&rdquo;</p>
+                <div className="mt-auto pt-5 border-t border-green-100/50 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-green-100 text-green-700">{t.avatar}</div>
                   <div>
-                    <p className="font-semibold text-sm text-primary">{t.name}</p>
-                    <p className="text-xs mt-0.5 text-muted">{t.role}</p>
+                    <p className="font-bold text-sm text-green-900">{t.name}</p>
+                    <p className="text-xs mt-0.5 font-medium text-gray-500">{t.role}</p>
                   </div>
                 </div>
               </div>
@@ -210,21 +199,21 @@ export default function HomePage() {
       </section>
 
       {/* Awards */}
-      <section className="py-16 px-6" style={{ backgroundColor: 'var(--bg-surface)' }}>
+      <section className="py-16 px-6 bg-green-50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <span className="font-semibold text-sm uppercase tracking-widest text-amber-500">Recognition</span>
-            <h2 className="text-3xl font-extrabold mt-3 text-primary">Awards & Recognition</h2>
+            <span className="font-semibold text-sm uppercase tracking-widest text-orange-600">Recognition</span>
+            <h2 className="text-3xl font-bold mt-3 text-green-900">Awards & Recognition</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {awards.map((a) => (
-              <div key={a.title} className="flex items-center gap-4 p-5 rounded-2xl border transition" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(245,158,11,0.1)' }}>
-                  <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <div key={a.title} className="flex items-center gap-5 p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-orange-50/80">
+                  <Star className="w-6 h-6 text-orange-500" />
                 </div>
                 <div>
-                  <p className="font-bold text-sm text-primary">{a.title}</p>
-                  <p className="text-xs mt-0.5 text-muted">{a.org}</p>
+                  <p className="font-bold text-sm text-green-900">{a.title}</p>
+                  <p className="text-xs mt-0.5 text-gray-400">{a.org}</p>
                 </div>
               </div>
             ))}
@@ -233,18 +222,17 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-6 page-bg relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.06) 0%, transparent 70%)' }} />
-        <div className="relative max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-5 text-primary">
-            Ready to make a <span className="text-gradient">difference?</span>
+      <section className="py-24 px-6 bg-green-700 text-center">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-4xl font-bold mb-5 text-white">
+            Ready to make a <span className="text-orange-400">difference?</span>
           </h2>
-          <p className="mb-10 text-lg text-secondary">Join thousands of donors and NGOs already fighting hunger with RescueBite.</p>
+          <p className="mb-10 text-lg text-green-100">Join thousands of donors and NGOs already fighting hunger with RescueBite.</p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/signup" className="px-8 py-4 rounded-xl text-white font-semibold transition shadow-xl" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 8px 32px rgba(34,197,94,0.25)' }}>
+            <Link href="/signup" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition">
               Get Started Free
             </Link>
-            <Link href="/impact" className="px-8 py-4 rounded-xl font-semibold transition border" style={{ borderColor: 'var(--border-hover)', color: 'var(--text-primary)' }}>
+            <Link href="/impact" className="border-2 border-white text-white hover:bg-white hover:text-green-800 px-8 py-3 rounded-xl font-semibold transition">
               View Impact Data
             </Link>
           </div>

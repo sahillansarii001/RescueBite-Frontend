@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Wheat, Trash2, TrendingUp, TrendingDown, Home, Baby, Droplet, Scale, Target, Trophy, Carrot, BarChart3, Flag, MapPin, Leaf } from 'lucide-react'
 
 // ── Data sourced from FAO, UNDP MPI, NFHS-5/6, SDG India Index (NITI Aayog) ──
 
@@ -15,7 +16,7 @@ const sources = [
 const stats = [
   {
     source: 'fao',
-    icon: '🌾',
+    icon: <Wheat className="w-8 h-8" />,
     value: '~194M',
     label: 'People undernourished in India',
     detail: 'India accounts for the largest share of the world\'s undernourished population, per FAO\'s State of Food Security report.',
@@ -24,7 +25,7 @@ const stats = [
   },
   {
     source: 'fao',
-    icon: '🗑️',
+    icon: <Trash2 className="w-8 h-8" />,
     value: '~40%',
     label: 'Food produced in India is lost or wasted',
     detail: 'One-third of food produced globally is wasted while ~800 million people suffer from hunger, according to FAO\'s food loss and waste platform.',
@@ -33,7 +34,7 @@ const stats = [
   },
   {
     source: 'fao',
-    icon: '📈',
+    icon: <TrendingUp className="w-8 h-8" />,
     value: '2.3B',
     label: 'People moderately or severely food-insecure globally (2024)',
     detail: 'About 28% of the global population faced moderate or severe food insecurity in 2024, up from 21.4% in 2015.',
@@ -42,7 +43,7 @@ const stats = [
   },
   {
     source: 'mpi',
-    icon: '📉',
+    icon: <TrendingDown className="w-8 h-8" />,
     value: '415M',
     label: 'Indians exited multidimensional poverty (2005–2021)',
     detail: 'India saw a remarkable reduction in poverty, with 415 million people exiting multidimensional poverty within 15 years, per UNDP MPI 2023.',
@@ -51,7 +52,7 @@ const stats = [
   },
   {
     source: 'mpi',
-    icon: '🏘️',
+    icon: <Home className="w-8 h-8" />,
     value: '11.28%',
     label: 'India\'s MPI headcount ratio (2019–21)',
     detail: 'India\'s National MPI fell from 24.85% (2015–16) to 11.28% (2019–21), reflecting significant progress across health, education, and living standards.',
@@ -60,7 +61,7 @@ const stats = [
   },
   {
     source: 'nfhs',
-    icon: '👶',
+    icon: <Baby className="w-8 h-8" />,
     value: '35%',
     label: 'Children under 5 are stunted (NFHS-6)',
     detail: 'Around 35% of children were stunted and 32% underweight, reflecting continued malnutrition concerns per NFHS-6 preliminary findings.',
@@ -69,7 +70,7 @@ const stats = [
   },
   {
     source: 'nfhs',
-    icon: '🩸',
+    icon: <Droplet className="w-8 h-8" />,
     value: '57%',
     label: 'Women affected by anaemia (NFHS-6)',
     detail: 'Nearly 57% of women and a large share of children are affected by anaemia, pointing to widespread iron and micronutrient deficiencies.',
@@ -78,7 +79,7 @@ const stats = [
   },
   {
     source: 'nfhs',
-    icon: '⚖️',
+    icon: <Scale className="w-8 h-8" />,
     value: '32%',
     label: 'Children under 5 are underweight (NFHS-6)',
     detail: 'Underweight prevalence among children under 5 remains at 32%, indicating persistent gaps in child nutrition across India.',
@@ -87,7 +88,7 @@ const stats = [
   },
   {
     source: 'sdg1',
-    icon: '🎯',
+    icon: <Target className="w-8 h-8" />,
     value: '72',
     label: 'India\'s SDG 1 (No Poverty) score in 2023–24',
     detail: 'India\'s SDG 1 score rose from 60 in 2020–21 to 72 in 2023–24, one of the largest improvements across all SDG goals.',
@@ -96,7 +97,7 @@ const stats = [
   },
   {
     source: 'sdg1',
-    icon: '🏆',
+    icon: <Trophy className="w-8 h-8" />,
     value: 'Tamil Nadu',
     label: 'Top-performing state on SDG 1 (No Poverty)',
     detail: 'Tamil Nadu and Telangana are front-runners on SDG 1 among Indian states, per the SDG India Index 2023–24.',
@@ -105,7 +106,7 @@ const stats = [
   },
   {
     source: 'sdg2',
-    icon: '🌽',
+    icon: <Carrot className="w-8 h-8" />,
     value: 'Kerala',
     label: 'Top-performing state on SDG 2 (Zero Hunger)',
     detail: 'Kerala leads Indian states on SDG 2 (Zero Hunger), while Puducherry tops among union territories, per SDG India Index 2023–24.',
@@ -114,7 +115,7 @@ const stats = [
   },
   {
     source: 'sdg2',
-    icon: '📊',
+    icon: <BarChart3 className="w-8 h-8" />,
     value: '295M+',
     label: 'People in acute hunger globally (2024)',
     detail: 'More than 295 million people across 53 countries experienced acute hunger in 2024, an increase of 13.7 million from 2023, per FAO.',
@@ -123,7 +124,7 @@ const stats = [
   },
   {
     source: 'niti',
-    icon: '🇮🇳',
+    icon: <Flag className="w-8 h-8" />,
     value: '67',
     label: 'India\'s Climate Action (SDG 13) score — biggest jump',
     detail: 'Climate Action saw the largest score increase across all SDGs, rising from 54 in 2020–21 to 67 in 2023–24, per NITI Aayog\'s SDG India Index.',
@@ -132,7 +133,7 @@ const stats = [
   },
   {
     source: 'niti',
-    icon: '📍',
+    icon: <MapPin className="w-8 h-8" />,
     value: 'UP, Bihar, MP',
     label: 'States with most people lifted out of MPI poverty',
     detail: 'Uttar Pradesh (5.94 crore), Bihar (3.77 crore), and Madhya Pradesh (2.30 crore) led state-level poverty reduction, per NITI Aayog MPI report.',
@@ -192,23 +193,23 @@ export default function DataPage() {
           {filtered.map((stat, i) => {
             const src = sourceMap[stat.source]
             return (
-              <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-3 hover:shadow-md transition">
+              <div key={i} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-green-200/50 p-8 flex flex-col gap-4 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl">{stat.icon}</span>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${src.color}`}>
+                  <span className={`text-3xl ${src.color.replace('bg-', 'text-').replace('-100', '-600')}`}>{stat.icon}</span>
+                  <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${src.color}`}>
                     {src.label}
                   </span>
                 </div>
-                <p className="text-3xl font-extrabold text-gray-900">{stat.value}</p>
-                <p className="font-semibold text-gray-800 text-sm leading-snug">{stat.label}</p>
-                <p className="text-gray-500 text-xs leading-relaxed flex-1">{stat.detail}</p>
+                <p className="text-4xl font-black text-green-900 tracking-tight">{stat.value}</p>
+                <p className="font-bold text-green-800 text-sm leading-snug">{stat.label}</p>
+                <p className="text-gray-500 text-sm font-medium leading-relaxed flex-1">{stat.detail}</p>
                 <a
                   href={stat.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-green-600 text-xs font-medium hover:underline mt-auto"
+                  className="text-green-600 text-xs font-bold hover:text-green-800 transition-colors mt-auto flex items-center gap-1 group"
                 >
-                  Source: {stat.linkLabel} ↗
+                  Source: {stat.linkLabel} <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                 </a>
               </div>
             )
@@ -234,10 +235,10 @@ export default function DataPage() {
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-green-300 transition"
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-green-200/50 hover:border-green-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
               >
-                <p className="font-bold text-green-700 text-sm">{s.label}</p>
-                <p className="text-gray-500 text-xs mt-1">{s.full}</p>
+                <p className="font-bold text-green-800 text-sm">{s.label}</p>
+                <p className="text-gray-500 font-medium text-xs mt-1">{s.full}</p>
               </a>
             ))}
           </div>
@@ -248,8 +249,8 @@ export default function DataPage() {
         </div>
       </section>
 
-      <footer className="bg-green-900 text-green-200 text-center py-6 text-sm">
-        <p>🍃 RescueBite © 2024 — Rescue food. Feed hope. Fight hunger.</p>
+      <footer className="bg-green-900 text-green-200 text-center py-6 text-sm flex items-center justify-center gap-2">
+        <Leaf className="w-4 h-4 text-green-400" /> RescueBite © 2024 — Rescue food. Feed hope. Fight hunger.
       </footer>
     </main>
   )

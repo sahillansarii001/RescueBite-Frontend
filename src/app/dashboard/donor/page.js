@@ -6,18 +6,19 @@ import { getUser, isLoggedIn } from '../../../utils/auth'
 import api from '../../../utils/api'
 import DashboardLayout from '../../../components/DashboardLayout'
 import DonationForm from '../../../components/DonationForm'
-import DonationCard from '../../../components/DonationCard'
-import DonationTable from '../../../components/DonationTable'
+import DonationCard, { DonationCardSkeleton } from '../../../components/DonationCard'
+import DonationTable, { DonationTableSkeleton } from '../../../components/DonationTable'
 import RewardCard from '../../../components/RewardCard'
 import Leaderboard from '../../../components/Leaderboard'
+import { LayoutDashboard, PlusCircle, List, Gift, Trophy, Medal, Award, Zap, Loader2, Utensils, RefreshCw } from 'lucide-react'
 
 const STATUS_FILTERS = ['all', 'pending', 'accepted', 'collected', 'completed']
 
 const StatCard = ({ label, value, sub, color }) => (
-  <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-    <p className="text-xs font-semibold uppercase tracking-widest text-muted mb-2">{label}</p>
-    <p className="text-3xl font-extrabold" style={{ color }}>{value}</p>
-    {sub && <p className="text-xs mt-1 text-muted">{sub}</p>}
+  <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+    <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">{label}</p>
+    <p className="text-3xl font-black tracking-tight" style={{ color }}>{value}</p>
+    {sub && <p className="text-xs mt-1.5 font-medium text-gray-400">{sub}</p>}
   </div>
 )
 
@@ -82,29 +83,16 @@ export default function DonorDashboard() {
   const pending = myDonations.filter(d => d.status === 'pending').length
 
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2"/></svg>
-    )},
-    { id: 'upload', label: 'New Donation', icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
-    )},
-    { id: 'history', label: 'My Donations', icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-    )},
-    { id: 'rewards', label: 'Rewards', icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-    )},
-    { id: 'leaderboard', label: 'Leaderboard', icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-    )},
+    { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'upload', label: 'New Donation', icon: <PlusCircle className="w-4 h-4" /> },
+    { id: 'history', label: 'My Donations', icon: <List className="w-4 h-4" /> },
+    { id: 'rewards', label: 'Rewards', icon: <Gift className="w-4 h-4" /> },
+    { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" /> },
   ]
 
   if (!user) return (
-    <div className="min-h-screen flex items-center justify-center page-bg">
-      <svg className="animate-spin h-8 w-8" style={{ color: 'var(--accent)' }} viewBox="0 0 24 24" fill="none">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-      </svg>
+    <div className="min-h-screen flex items-center justify-center bg-green-50/50">
+      <Loader2 className="animate-spin h-10 w-10 text-green-600" />
     </div>
   )
 
@@ -123,17 +111,17 @@ export default function DonorDashboard() {
           </div>
 
           {lastDonation && (
-            <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'rgba(245,158,11,0.3)' }}>
-              <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="p-6 rounded-3xl border border-orange-200/60 bg-orange-50/30 shadow-sm">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#f59e0b' }}>Quick Donate</p>
-                  <p className="font-semibold text-primary text-sm">{lastDonation.foodName} — {lastDonation.quantity}</p>
-                  <p className="text-xs text-muted mt-0.5">{lastDonation.location}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-widest mb-1 text-orange-600">Quick Donate</p>
+                  <p className="font-bold text-gray-900 text-base">{lastDonation.foodName} — <span className="text-gray-600 font-medium">{lastDonation.quantity}</span></p>
+                  <p className="text-sm text-gray-500 mt-1">{lastDonation.location}</p>
                 </div>
                 <button onClick={handleQuickDonate} disabled={quickLoading}
-                  className="px-5 py-2 rounded-xl text-white text-sm font-semibold transition disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-3 rounded-xl text-white text-sm font-bold transition-all duration-300 disabled:opacity-60 flex items-center gap-2 shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.23)] hover:-translate-y-0.5 active:translate-y-0"
                   style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-                  {quickLoading && <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>}
+                  {quickLoading ? <Loader2 className="animate-spin h-5 w-5" /> : <RefreshCw className="w-4 h-4" />}
                   {quickLoading ? 'Submitting...' : 'Donate Same Again'}
                 </button>
               </div>
@@ -141,38 +129,38 @@ export default function DonorDashboard() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted mb-4">Badge Progress</p>
+            <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-5">Badge Progress</p>
               {[
-                { icon: '🥈', label: 'Silver Badge', target: 10, color: '#94a3b8' },
-                { icon: '🥇', label: 'Gold Badge', target: 50, color: '#f59e0b' },
-                { icon: '🦸', label: 'Hunger Hero', target: 100, color: '#d946ef' },
+                { icon: <Medal className="w-4 h-4 text-gray-500" />, label: 'Silver Badge', target: 10, color: '#94a3b8' },
+                { icon: <Award className="w-4 h-4 text-yellow-600" />, label: 'Gold Badge', target: 50, color: '#f59e0b' },
+                { icon: <Zap className="w-4 h-4 text-green-600" />, label: 'Hunger Hero', target: 100, color: '#d946ef' },
               ].map(b => {
                 const pct = Math.min(100, Math.round(((user.donationCount || 0) / b.target) * 100))
                 return (
-                  <div key={b.label} className="mb-3">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-secondary">{b.icon} {b.label}</span>
-                      <span className="text-muted">{user.donationCount || 0}/{b.target}</span>
+                  <div key={b.label} className="mb-4 last:mb-0">
+                    <div className="flex justify-between items-center text-sm mb-1.5">
+                      <span className="font-semibold text-gray-700 flex items-center gap-2">{b.icon} {b.label}</span>
+                      <span className="font-bold text-gray-500">{user.donationCount || 0}/{b.target}</span>
                     </div>
-                    <div className="h-1.5 rounded-full" style={{ backgroundColor: 'var(--bg-hover)' }}>
-                      <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: b.color }} />
+                    <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${pct}%`, backgroundColor: b.color }} />
                     </div>
                   </div>
                 )
               })}
             </div>
-            <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted mb-4">Recent Activity</p>
+            <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-5">Recent Activity</p>
               {myDonations.slice(0, 4).length === 0 ? (
-                <p className="text-sm text-muted text-center py-4">No donations yet</p>
+                <p className="text-sm font-medium text-gray-400 text-center py-4">No donations yet</p>
               ) : myDonations.slice(0, 4).map(d => (
-                <div key={d._id} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
+                <div key={d._id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                   <div>
-                    <p className="text-sm font-medium text-primary">{d.foodName}</p>
-                    <p className="text-xs text-muted">{d.quantity}</p>
+                    <p className="text-sm font-bold text-gray-800">{d.foodName}</p>
+                    <p className="text-xs text-gray-500 font-medium mt-0.5">{d.quantity}</p>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
+                  <span className="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider" style={{
                     backgroundColor: d.status === 'completed' ? 'rgba(34,197,94,0.12)' : d.status === 'pending' ? 'rgba(245,158,11,0.12)' : 'rgba(59,130,246,0.12)',
                     color: d.status === 'completed' ? '#22c55e' : d.status === 'pending' ? '#f59e0b' : '#3b82f6',
                   }}>{d.status}</span>
@@ -228,13 +216,17 @@ export default function DonorDashboard() {
             </div>
           </div>
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => <div key={i} className="h-64 rounded-2xl animate-pulse" style={{ backgroundColor: 'var(--bg-card)' }} />)}
-            </div>
+            viewMode === 'cards' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(3)].map((_, i) => <DonationCardSkeleton key={i} />)}
+              </div>
+            ) : (
+              <DonationTableSkeleton />
+            )
           ) : filteredDonations.length === 0 ? (
-            <div className="text-center py-20 text-muted">
-              <p className="text-4xl mb-3">🍱</p>
-              <p className="text-sm">{statusFilter === 'all' ? "No donations yet. Start by uploading one!" : `No ${statusFilter} donations.`}</p>
+            <div className="text-center py-24 text-gray-400 flex flex-col items-center">
+              <Utensils className="w-16 h-16 mb-4 text-green-200" />
+              <p className="text-sm font-medium">{statusFilter === 'all' ? "No donations yet. Start by uploading one!" : `No ${statusFilter} donations.`}</p>
             </div>
           ) : viewMode === 'cards' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -250,22 +242,24 @@ export default function DonorDashboard() {
       {activeTab === 'rewards' && (
         <div className="max-w-lg space-y-4">
           <RewardCard points={user.points || 0} badges={user.badges || []} donationCount={user.donationCount || 0} />
-          <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-            <p className="text-sm font-semibold text-primary mb-4">Badge System</p>
+          <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-6">Badge System</p>
             {[
-              { icon: '🥈', label: 'Silver Badge', req: '10 donations', pts: '+100 pts' },
-              { icon: '🥇', label: 'Gold Badge', req: '50 donations', pts: '+500 pts' },
-              { icon: '🦸', label: 'Hunger Hero', req: '100 donations', pts: '+1000 pts' },
+              { icon: <Medal className="w-5 h-5 text-gray-500" />, label: 'Silver Badge', req: '10 donations', pts: '+100 pts' },
+              { icon: <Award className="w-5 h-5 text-yellow-600" />, label: 'Gold Badge', req: '50 donations', pts: '+500 pts' },
+              { icon: <Zap className="w-5 h-5 text-green-600" />, label: 'Hunger Hero', req: '100 donations', pts: '+1000 pts' },
             ].map(b => (
-              <div key={b.label} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{b.icon}</span>
+              <div key={b.label} className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+                    {b.icon}
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-primary">{b.label}</p>
-                    <p className="text-xs text-muted">{b.req}</p>
+                    <p className="text-sm font-bold text-gray-900">{b.label}</p>
+                    <p className="text-xs font-medium text-gray-500 mt-0.5">{b.req}</p>
                   </div>
                 </div>
-                <span className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{b.pts}</span>
+                <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>{b.pts}</span>
               </div>
             ))}
           </div>

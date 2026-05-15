@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { getUser, isLoggedIn } from '../../utils/auth'
 import api from '../../utils/api'
-import AnalyticsCharts from '../../components/AnalyticsCharts'
-import DonationTable from '../../components/DonationTable'
+import AnalyticsCharts, { AnalyticsChartsSkeleton } from '../../components/AnalyticsCharts'
+import DonationTable, { DonationTableSkeleton } from '../../components/DonationTable'
 import DashboardLayout from '../../components/DashboardLayout'
+import { Users, Home, Handshake, Package, Clock, CheckCircle, Truck, PartyPopper, RefreshCw, Plus, X, Star, LayoutDashboard, BarChart2, UserCog, List, Loader2 } from 'lucide-react'
 
 const STATUS_FILTERS = ['all', 'pending', 'accepted', 'collected', 'completed']
 const ROLE_FILTERS = ['all', 'donor', 'ngo', 'admin']
@@ -18,12 +19,14 @@ const roleColor = (role) => {
   return { bg: 'rgba(34,197,94,0.12)', text: '#22c55e' }
 }
 
-const StatCard = ({ label, value, color, icon }) => (
-  <div className="p-5 rounded-2xl border flex items-center gap-4" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: `${color}20` }}>{icon}</div>
+const StatCard = ({ label, value, color, icon: Icon }) => (
+  <div className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-4">
+    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm" style={{ backgroundColor: `${color}15` }}>
+      <Icon className="w-6 h-6" style={{ color }} />
+    </div>
     <div>
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
-      <p className="text-2xl font-extrabold mt-0.5" style={{ color }}>{value}</p>
+      <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500">{label}</p>
+      <p className="text-3xl font-black mt-0.5 text-green-900 tracking-tight">{value}</p>
     </div>
   </div>
 )
@@ -141,21 +144,18 @@ export default function AdminPage() {
   const filteredDonations = statusFilter === 'all' ? donations : donations.filter(d => d.status === statusFilter)
 
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2"/></svg> },
-    { id: 'analytics', label: 'Analytics', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg> },
-    { id: 'users', label: 'Users', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> },
-    { id: 'donations', label: 'Donations', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg> },
+    { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'analytics', label: 'Analytics', icon: <BarChart2 className="w-4 h-4" /> },
+    { id: 'users', label: 'Users', icon: <UserCog className="w-4 h-4" /> },
+    { id: 'donations', label: 'Donations', icon: <List className="w-4 h-4" /> },
   ]
 
   const inputCls = 'w-full rounded-xl px-3 py-2 text-sm focus:outline-none transition text-primary'
   const inputSty = { backgroundColor: 'var(--bg-base)', border: '1px solid var(--border)' }
 
   if (!user || loading) return (
-    <div className="min-h-screen flex items-center justify-center page-bg">
-      <svg className="animate-spin h-8 w-8" style={{ color: 'var(--accent)' }} viewBox="0 0 24 24" fill="none">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-      </svg>
+    <div className="min-h-screen flex items-center justify-center bg-green-50/50">
+      <Loader2 className="animate-spin h-10 w-10 text-green-600" />
     </div>
   )
 
@@ -167,21 +167,20 @@ export default function AdminPage() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Total Users" value={users.length} color="#22c55e" icon="👥" />
-            <StatCard label="Donors" value={users.filter(u => u.role === 'donor').length} color="#3b82f6" icon="🏠" />
-            <StatCard label="NGOs" value={users.filter(u => u.role === 'ngo').length} color="#f59e0b" icon="🤝" />
-            <StatCard label="Donations" value={donations.length} color="#d946ef" icon="📦" />
+            <StatCard label="Total Users" value={users.length} color="#22c55e" icon={Users} />
+            <StatCard label="Donors" value={users.filter(u => u.role === 'donor').length} color="#3b82f6" icon={Home} />
+            <StatCard label="NGOs" value={users.filter(u => u.role === 'ngo').length} color="#f59e0b" icon={Handshake} />
+            <StatCard label="Donations" value={donations.length} color="#d946ef" icon={Package} />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Pending" value={donations.filter(d => d.status === 'pending').length} color="#f59e0b" icon="⏳" />
-            <StatCard label="Accepted" value={donations.filter(d => d.status === 'accepted').length} color="#3b82f6" icon="✅" />
-            <StatCard label="Collected" value={donations.filter(d => d.status === 'collected').length} color="#8b5cf6" icon="🚗" />
-            <StatCard label="Completed" value={donations.filter(d => d.status === 'completed').length} color="#22c55e" icon="🎉" />
+            <StatCard label="Pending" value={donations.filter(d => d.status === 'pending').length} color="#f59e0b" icon={Clock} />
+            <StatCard label="Accepted" value={donations.filter(d => d.status === 'accepted').length} color="#3b82f6" icon={CheckCircle} />
+            <StatCard label="Collected" value={donations.filter(d => d.status === 'collected').length} color="#8b5cf6" icon={Truck} />
+            <StatCard label="Completed" value={donations.filter(d => d.status === 'completed').length} color="#22c55e" icon={PartyPopper} />
           </div>
           <div className="flex justify-end">
-            <button onClick={fetchAll} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition text-secondary hover:text-primary"
-              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <button onClick={fetchAll} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 bg-white border border-green-200 hover:bg-green-50 hover:text-green-700 shadow-sm hover:shadow-md text-gray-700">
+              <RefreshCw className="w-4 h-4" />
               Refresh
             </button>
           </div>
@@ -207,9 +206,9 @@ export default function AdminPage() {
                 className="rounded-xl px-3 py-1.5 text-xs focus:outline-none w-52 text-primary"
                 style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }} />
             </div>
-            <button onClick={openCreate} className="px-4 py-2 rounded-xl text-white text-sm font-semibold transition"
+            <button onClick={openCreate} className="px-5 py-2.5 flex items-center gap-2 rounded-xl text-white text-sm font-bold transition-all duration-300 shadow-[0_4px_14px_0_rgba(34,197,94,0.39)] hover:shadow-[0_6px_20px_rgba(34,197,94,0.23)] hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
-              + Add User
+              <Plus className="w-4 h-4" /> Add User
             </button>
           </div>
           <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
@@ -233,7 +232,7 @@ export default function AdminPage() {
                         <td className="px-4 py-3">
                           <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: rc.bg, color: rc.text }}>{u.role}</span>
                         </td>
-                        <td className="px-4 py-3 text-xs font-semibold" style={{ color: 'var(--accent)' }}>⭐ {u.points}</td>
+                        <td className="px-4 py-3 text-xs font-semibold flex items-center gap-1" style={{ color: 'var(--accent)' }}><Star className="w-3.5 h-3.5 fill-current" /> {u.points}</td>
                         <td className="px-4 py-3 text-xs text-secondary">{u.donationCount}</td>
                         <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
                         <td className="px-4 py-3">
@@ -364,7 +363,7 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  {[['Name',userDetail.user.name],['Email',userDetail.user.email],['Phone',userDetail.user.phone||'—'],['Role',userDetail.user.role],['Location',userDetail.user.location||'—'],['Points',`⭐ ${userDetail.user.points}`],['Donations',userDetail.user.donationCount],['Joined',userDetail.user.createdAt?new Date(userDetail.user.createdAt).toLocaleDateString():'—']].map(([l,v]) => (
+                  {[['Name',userDetail.user.name],['Email',userDetail.user.email],['Phone',userDetail.user.phone||'—'],['Role',userDetail.user.role],['Location',userDetail.user.location||'—'],['Points',<span key="points" className="flex items-center gap-1"><Star className="w-3 h-3 fill-current"/>{userDetail.user.points}</span>],['Donations',userDetail.user.donationCount],['Joined',userDetail.user.createdAt?new Date(userDetail.user.createdAt).toLocaleDateString():'—']].map(([l,v]) => (
                     <div key={l} className="p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-card)' }}>
                       <p className="text-xs text-muted">{l}</p>
                       <p className="font-medium text-primary text-xs mt-0.5 break-all">{v}</p>
