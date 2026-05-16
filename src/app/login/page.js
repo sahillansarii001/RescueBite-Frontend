@@ -12,6 +12,14 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
+  
+  // Forgot Password State
+  const [isForgotPassMode, setIsForgotPassMode] = useState(false)
+  const [forgotStep, setForgotStep] = useState(1)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetOtp, setResetOtp] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
 
   useEffect(() => {
     if (!isLoggedIn()) return
@@ -36,6 +44,53 @@ export default function LoginPage() {
       toast.error(err.response?.data?.message || 'Login failed')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault()
+    if (!resetEmail) { toast.error('Please enter your email'); return }
+    setResetLoading(true)
+    try {
+      await api.post('/auth/forgot-password', { email: resetEmail })
+      toast.success('Password reset code sent!')
+      setForgotStep(2)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send reset code')
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault()
+    if (!resetOtp) { toast.error('Enter valid OTP'); return }
+    setResetLoading(true)
+    try {
+      await api.post('/auth/verify-otp', { email: resetEmail, otp: resetOtp })
+      toast.success('OTP verified successfully!')
+      setForgotStep(3)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Invalid or expired OTP')
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault()
+    if (newPassword.length < 6) { toast.error('Password must be at least 6 characters'); return }
+    setResetLoading(true)
+    try {
+      await api.post('/auth/reset-password', { email: resetEmail, otp: resetOtp, newPassword })
+      toast.success('Password reset successfully! Please log in.')
+      setIsForgotPassMode(false)
+      setForgotStep(1)
+      setForm(p => ({ ...p, email: resetEmail, password: '' }))
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to reset password')
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -80,9 +135,14 @@ export default function LoginPage() {
             <span className="font-bold text-lg text-green-700">RescueBite</span>
           </div>
 
-          <h1 className="text-2xl font-black text-green-900 tracking-tight text-center mb-1">Welcome back</h1>
-          <p className="text-gray-500 font-medium text-sm text-center mb-8">Sign in to your account to continue</p>
+          <h1 className="text-2xl font-black text-green-900 tracking-tight text-center mb-1">
+            {isForgotPassMode ? (forgotStep === 1 ? 'Reset Password' : forgotStep === 2 ? 'Verify OTP' : 'New Password') : 'Welcome back'}
+          </h1>
+          <p className="text-gray-500 font-medium text-sm text-center mb-8">
+            {isForgotPassMode ? (forgotStep === 1 ? 'Enter your email to receive a code' : forgotStep === 2 ? `Code sent to ${resetEmail}` : 'Enter your new password') : 'Sign in to your account to continue'}
+          </p>
 
+          {!isForgotPassMode ? (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">Email Address</label>
@@ -109,7 +169,59 @@ export default function LoginPage() {
                 <><Loader2 className="animate-spin h-4 w-4" />Signing in...</>
               ) : 'Sign In'}
             </button>
+
+            <div className="text-center mt-3">
+              <button type="button" onClick={() => setIsForgotPassMode(true)} className="text-sm font-medium text-green-700 hover:text-green-800 transition">
+                Forgot password?
+              </button>
+            </div>
           </form>
+          ) : forgotStep === 1 ? (
+            <form onSubmit={handleForgotPassword} className="space-y-5">
+              <div>
+                <label className="block text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">Email Address</label>
+                <input type="email" required placeholder="you@example.com"
+                  value={resetEmail} onChange={(e) => setResetEmail(e.target.value)}
+                  className="w-full bg-white border border-green-200/80 rounded-xl px-4 py-3 text-sm text-gray-700 font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors" />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setIsForgotPassMode(false)} className="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold text-sm transition">Back</button>
+                <button type="submit" disabled={resetLoading} className="w-2/3 bg-green-700 hover:bg-green-800 text-white py-3 rounded-xl font-bold text-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
+                  {resetLoading ? <Loader2 className="animate-spin h-4 w-4" /> : 'Send Code'}
+                </button>
+              </div>
+            </form>
+          ) : forgotStep === 2 ? (
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
+              <div>
+                <label className="block text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">6-Digit Code</label>
+                <input type="text" required placeholder="------"
+                  value={resetOtp} onChange={(e) => setResetOtp(e.target.value)}
+                  className="w-full bg-white border border-green-200/80 rounded-xl px-4 py-3 text-sm text-gray-700 font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors tracking-widest text-center" />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setForgotStep(1)} className="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold text-sm transition">Back</button>
+                <button type="submit" disabled={resetLoading} className="w-2/3 bg-green-700 hover:bg-green-800 text-white py-3 rounded-xl font-bold text-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
+                  {resetLoading ? <Loader2 className="animate-spin h-4 w-4" /> : 'Verify Code'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleResetPassword} className="space-y-5">
+              <div>
+                <label className="block text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">New Password</label>
+                <input type="password" required placeholder="••••••••"
+                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-white border border-green-200/80 rounded-xl px-4 py-3 text-sm text-gray-700 font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors" />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setForgotStep(2)} className="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold text-sm transition">Back</button>
+                <button type="submit" disabled={resetLoading} className="w-2/3 bg-green-700 hover:bg-green-800 text-white py-3 rounded-xl font-bold text-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
+                  {resetLoading ? <Loader2 className="animate-spin h-4 w-4" /> : 'Reset Password'}
+                </button>
+              </div>
+            </form>
+          )}
 
           <p className="text-center text-sm mt-6 text-gray-400">
             New here?{' '}
