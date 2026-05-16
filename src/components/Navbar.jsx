@@ -44,10 +44,17 @@ export default function Navbar() {
     router.push("/login");
   };
 
+  const getDashboardUrl = () => {
+    if (!user) return "/";
+    if (user.role === "admin") return "/admin";
+    if (user.role === "ngo") return "/dashboard/ngo";
+    return "/dashboard/donor";
+  };
+
   const labels = {
-    en: { logout: "Logout", login: "Login", signup: "Get Started" },
-    hi: { logout: "लॉग आउट", login: "लॉगिन", signup: "शुरू करें" },
-    mr: { logout: "लॉग आउट", login: "लॉगिन", signup: "सुरुवात करा" },
+    en: { logout: "Logout", login: "Login", signup: "Get Started", dashboard: "Dashboard" },
+    hi: { logout: "लॉग आउट", login: "लॉगिन", signup: "शुरू करें", dashboard: "डैशबोर्ड" },
+    mr: { logout: "लॉग आउट", login: "लॉगिन", signup: "सुरुवात करा", dashboard: "डॅशबोर्ड" },
   };
   const t = labels[lang] || labels.en;
 
@@ -105,13 +112,21 @@ export default function Navbar() {
 
           {mounted &&
             (user ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="text-sm px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition"
-              >
-                {t.logout}
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={getDashboardUrl()}
+                  className="text-sm px-4 py-2 rounded-lg border border-green-300 text-green-700 hover:bg-green-50 font-medium transition"
+                >
+                  {t.dashboard}
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-sm px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition"
+                >
+                  {t.logout}
+                </button>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Link
@@ -176,13 +191,22 @@ export default function Navbar() {
             </select>
             {mounted &&
               (user ? (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="text-sm px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white w-fit font-medium"
-                >
-                  {t.logout}
-                </button>
+                <div className="flex gap-2">
+                  <Link
+                    href={getDashboardUrl()}
+                    onClick={() => setMenuOpen(false)}
+                    className="text-sm px-4 py-2 rounded-lg border border-green-300 text-green-700 font-medium"
+                  >
+                    {t.dashboard}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="text-sm px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white w-fit font-medium"
+                  >
+                    {t.logout}
+                  </button>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <Link
