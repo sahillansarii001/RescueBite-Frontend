@@ -9,10 +9,10 @@ import { Utensils, Package, Handshake, Users, Star } from 'lucide-react'
 const PIE_COLORS = ['#43A047', '#FB8C00', '#66BB6A']
 
 const statCards = (a) => [
-  { icon: <Utensils className="w-5 h-5 text-green-700" />, label: 'Meals Saved', value: a.totalMealsSaved ?? 0 },
-  { icon: <Package className="w-5 h-5 text-green-700" />, label: 'Total Donations', value: a.totalDonations ?? 0 },
-  { icon: <Handshake className="w-5 h-5 text-green-700" />, label: 'Active NGOs', value: a.activeNGOs ?? 0 },
-  { icon: <Users className="w-5 h-5 text-green-700" />, label: 'Total Donors', value: a.totalDonors ?? 0 },
+  { icon: Utensils, color: '#43A047', label: 'Meals Saved', value: a.totalMealsSaved ?? 0 },
+  { icon: Package, color: '#22c55e', label: 'Total Donations', value: a.totalDonations ?? 0 },
+  { icon: Handshake, color: '#f59e0b', label: 'Active NGOs', value: a.activeNGOs ?? 0 },
+  { icon: Users, color: '#3b82f6', label: 'Total Donors', value: a.totalDonors ?? 0 },
 ]
 
 export function AnalyticsChartsSkeleton() {
@@ -59,10 +59,14 @@ export default function AnalyticsCharts({ analytics }) {
     <div className="space-y-8">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards(analytics).map((s) => (
-          <div key={s.label} className="bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-3xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-300 p-6 flex flex-col items-center justify-center gap-1.5">
-            <div className="bg-green-100/50 rounded-2xl p-3 flex items-center justify-center">{s.icon}</div>
-            <p className="text-3xl font-black text-green-900 tracking-tight mt-1">{s.value}</p>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest text-center">{s.label}</p>
+          <div key={s.label} className="p-6 rounded-3xl border border-green-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm" style={{ backgroundColor: `${s.color}15` }}>
+              <s.icon className="w-6 h-6" style={{ color: s.color }} />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500">{s.label}</p>
+              <p className="text-3xl font-black mt-0.5 text-green-900 tracking-tight">{s.value}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -130,6 +134,7 @@ export default function AnalyticsCharts({ analytics }) {
               ))}
             </tbody>
           </table>
+          {(analytics.topDonors || []).length === 0 && <p className="text-center text-gray-400 py-6 text-sm">No donors yet.</p>}
         </div>
       </div>
     </div>

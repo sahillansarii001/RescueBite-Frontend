@@ -22,7 +22,7 @@ export default function DashboardLayout({ user, navItems, activeTab, setActiveTa
   const rc = roleColors[user?.role] || roleColors.donor
 
   return (
-    <div className="flex min-h-screen bg-green-50">
+    <div className="flex h-screen overflow-hidden bg-green-50">
 
       {/* Sidebar */}
       <aside
@@ -94,7 +94,7 @@ export default function DashboardLayout({ user, navItems, activeTab, setActiveTa
       {sidebarOpen && <div className="fixed inset-0 z-30 bg-black/30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top bar */}
         <header className="sticky top-0 z-20 flex items-center gap-4 px-6 py-4 bg-white border-b border-green-200">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg text-green-700 bg-green-50 border border-green-200 transition-colors hover:bg-green-100">

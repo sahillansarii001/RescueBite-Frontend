@@ -337,7 +337,10 @@ export default function DonorDashboard() {
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Needs Food</span>
                   </div>
-                  <h3 className="text-lg font-black text-gray-800 mb-0.5">{r.ngoId?.name}</h3>
+                  <h3 className="text-lg font-black text-gray-800 mb-0.5 flex items-center gap-1.5">
+                    {r.ngoId?.name}
+                    {r.ngoId?.isVerified && <ShieldCheck className="w-4 h-4 text-green-500" title="Verified NGO" />}
+                  </h3>
                   <p className="text-xs font-medium text-gray-500 mb-4">{r.ngoId?.location}</p>
                   
                   <div className="p-4 rounded-2xl bg-green-50/50 border border-green-100 mb-6">

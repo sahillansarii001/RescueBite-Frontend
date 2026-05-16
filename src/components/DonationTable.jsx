@@ -1,6 +1,6 @@
 'use client'
 import StatusBadge from './StatusBadge'
-import { Trash2, Utensils } from 'lucide-react'
+import { Trash2, Utensils, ShieldCheck } from 'lucide-react'
 
 export function DonationTableSkeleton() {
   return (
@@ -66,7 +66,15 @@ export default function DonationTable({ donations = [], onDelete, deletingIds })
                 <td className="px-4 py-3 text-gray-600">{d.expiryTime ? new Date(d.expiryTime).toLocaleDateString() : '—'}</td>
                 <td className="px-4 py-3"><StatusBadge status={d.status} /></td>
                 <td className="px-4 py-3 text-gray-600">{d.donorId?.name || '—'}</td>
-                <td className="px-4 py-3 text-blue-500 font-medium">{d.acceptedBy?.name || '—'}</td>
+                <td className="px-4 py-3 text-blue-500 font-medium">
+                  <div className="flex items-center gap-1.5">
+                    {d.acceptedBy?.name || '—'}
+                    {d.acceptedBy?.isVerified && <ShieldCheck className="w-4 h-4 text-green-500" title="Verified NGO" />}
+                  </div>
+                  {d.impactDetails?.submitted && (
+                    <div className="text-[10px] text-green-600 mt-0.5 whitespace-nowrap">Impact recorded</div>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-gray-400">{d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '—'}</td>
                 {onDelete && (
                   <td className="px-4 py-3">

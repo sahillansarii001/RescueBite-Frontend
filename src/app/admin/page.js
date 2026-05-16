@@ -160,6 +160,20 @@ export default function AdminPage() {
     finally { setActingUserIds(p => { const s = new Set(p); s.delete(id); return s }) }
   }
 
+  const handleVerifyNgo = async (u) => {
+    if (actingUserIds.has(u._id)) return
+    setActingUserIds(p => new Set([...p, u._id]))
+    try {
+      const res = await api.put(`/users/admin/${u._id}/verify`)
+      setUsers(p => p.map(user => user._id === u._id ? res.data.user : user))
+      toast.success(res.data.message || 'Verification updated')
+      if (selectedUser && selectedUser._id === u._id) {
+        setSelectedUser(res.data.user)
+      }
+    } catch (err) { toast.error(err.response?.data?.message || 'Verification failed') }
+    finally { setActingUserIds(p => { const s = new Set(p); s.delete(u._id); return s }) }
+  }
+
   const filteredUsers = users
     .filter(u => roleFilter === 'all' || u.role === roleFilter)
     .filter(u => !searchQuery || u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -250,7 +264,12 @@ export default function AdminPage() {
                     const rc = roleColor(u.role)
                     return (
                       <tr key={u._id} className="border-t transition" style={{ borderColor: 'var(--border)', backgroundColor: i % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-surface)' }}>
-                        <td className="px-4 py-3 font-medium text-primary whitespace-nowrap">{u.name}</td>
+                        <td className="px-4 py-3 font-medium text-primary whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            {u.name}
+                            {u.role === 'ngo' && u.isVerified && <ShieldCheck className="w-4 h-4 text-green-500" title="Verified NGO" />}
+                          </div>
+                        </td>
                         <td className="px-4 py-3 text-xs text-secondary">{u.email}</td>
                         <td className="px-4 py-3 text-xs text-secondary">{u.phone || '—'}</td>
                         <td className="px-4 py-3">
@@ -265,6 +284,13 @@ export default function AdminPage() {
                               <button key={label} onClick={fn} className="text-xs px-2 py-1 rounded-lg font-medium transition"
                                 style={{ backgroundColor: `${color}15`, color }}>{label}</button>
                             ))}
+                            {u.role === 'ngo' && (
+                              <button onClick={() => handleVerifyNgo(u)} disabled={actingUserIds.has(u._id)}
+                                className="text-xs px-2 py-1 rounded-lg font-medium transition disabled:opacity-40"
+                                style={{ backgroundColor: u.isVerified ? 'rgba(245,158,11,0.12)' : 'rgba(34,197,94,0.12)', color: u.isVerified ? '#f59e0b' : '#22c55e' }}>
+                                {actingUserIds.has(u._id) ? '...' : (u.isVerified ? 'Unverify' : 'Verify')}
+                              </button>
+                            )}
                             {u.role !== 'admin' && (
                               <button onClick={() => handleDeleteUser(u._id)} disabled={actingUserIds.has(u._id)}
                                 className="text-xs px-2 py-1 rounded-lg font-medium transition disabled:opacity-40"
@@ -402,7 +428,7 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  {[['Name',userDetail.user.name],['Email',userDetail.user.email],['Phone',userDetail.user.phone||'—'],['Role',userDetail.user.role],['Location',userDetail.user.location||'—'],['Points',<span key="points" className="flex items-center gap-1"><Star className="w-3 h-3 fill-current"/>{userDetail.user.points}</span>],['Donations',userDetail.user.donationCount],['Joined',userDetail.user.createdAt?new Date(userDetail.user.createdAt).toLocaleDateString():'—']].map(([l,v]) => (
+                  {[['Name', <span key="name" className="flex items-center gap-2">{userDetail.user.name}{userDetail.user.role === 'ngo' && userDetail.user.isVerified && <ShieldCheck className="w-4 h-4 text-green-500" title="Verified NGO" />}</span>],['Email',userDetail.user.email],['Phone',userDetail.user.phone||'—'],['Role',userDetail.user.role],['Location',userDetail.user.location||'—'],['Points',<span key="points" className="flex items-center gap-1"><Star className="w-3 h-3 fill-current"/>{userDetail.user.points}</span>],['Donations',userDetail.user.donationCount],['Joined',userDetail.user.createdAt?new Date(userDetail.user.createdAt).toLocaleDateString():'—']].map(([l,v]) => (
                     <div key={l} className="p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-card)' }}>
                       <p className="text-xs text-muted">{l}</p>
                       <p className="font-medium text-primary text-xs mt-0.5 break-all">{v}</p>

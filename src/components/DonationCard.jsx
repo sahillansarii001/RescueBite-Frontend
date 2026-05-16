@@ -1,6 +1,6 @@
 'use client'
 import StatusBadge from './StatusBadge'
-import { MapPin, Clock, Utensils } from 'lucide-react'
+import { MapPin, Clock, Utensils, ShieldCheck, CheckCircle2 } from 'lucide-react'
 
 export function DonationCardSkeleton() {
   return (
@@ -68,9 +68,17 @@ export default function DonationCard({ donation, actionLabel, onAction, showActi
           </p>
         )}
         {acceptedByName && (
-          <p className="text-xs text-blue-500 font-medium mt-1">
+          <p className="text-xs text-blue-500 font-medium mt-1 flex items-center gap-1">
             Accepted by: {acceptedByName}
+            {donation.acceptedBy?.isVerified && <ShieldCheck className="w-3.5 h-3.5 text-green-500" title="Verified NGO" />}
           </p>
+        )}
+        {donation.impactDetails?.submitted && (
+          <div className="mt-2 p-2.5 bg-green-50/50 rounded-xl border border-green-100/50">
+            <p className="text-[10px] font-bold text-green-700 mb-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Impact Recorded</p>
+            <p className="text-xs text-gray-600">Fed {donation.impactDetails.peopleFed} people at {donation.impactDetails.usedLocation}</p>
+            {donation.impactDetails.description && <p className="text-xs text-gray-500 italic mt-1">&quot;{donation.impactDetails.description}&quot;</p>}
+          </div>
         )}
       </div>
 

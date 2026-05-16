@@ -36,7 +36,7 @@ export default function Footer() {
   return (
     <footer className="bg-green-900 text-white">
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
 
           {/* Brand */}
           <div className="lg:col-span-2">
@@ -94,10 +94,10 @@ export default function Footer() {
               <p className="font-bold text-white text-lg">Stay updated on our impact</p>
               <p className="text-green-200 text-sm mt-1.5">Get monthly reports on meals rescued, cities added, and platform updates.</p>
             </div>
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <input type="email" placeholder="Enter your email"
-                className="flex-1 md:w-72 rounded-xl px-4 py-3 text-sm focus:outline-none transition-all duration-300 text-gray-700 placeholder-gray-400 bg-white/95 focus:bg-white border-2 border-transparent focus:border-green-400 shadow-inner" />
-              <button className="px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all duration-300 whitespace-nowrap shadow-[0_4px_14px_0_rgba(234,88,12,0.39)] hover:shadow-[0_6px_20px_rgba(234,88,12,0.23)] bg-orange-600 hover:bg-orange-500 hover:-translate-y-0.5">
+                className="w-full sm:flex-1 md:w-72 rounded-xl px-4 py-3 text-sm focus:outline-none transition-all duration-300 text-gray-700 placeholder-gray-400 bg-white/95 focus:bg-white border-2 border-transparent focus:border-green-400 shadow-inner" />
+              <button className="w-full sm:w-auto px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all duration-300 whitespace-nowrap shadow-[0_4px_14px_0_rgba(234,88,12,0.39)] hover:shadow-[0_6px_20px_rgba(234,88,12,0.23)] bg-orange-600 hover:bg-orange-500 hover:-translate-y-0.5">
                 Subscribe
               </button>
             </div>
@@ -105,9 +105,9 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-green-700 mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-green-400">
+        <div className="border-t border-green-700 mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-green-400 text-center md:text-left">
           <p>© 2024 RescueBite. All rights reserved. Built with love to fight hunger across India.</p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap justify-center md:justify-end gap-4 sm:gap-6">
             <Link href="/contact" className="hover:text-white transition">Privacy Policy</Link>
             <Link href="/contact" className="hover:text-white transition">Terms of Service</Link>
             <Link href="/contact" className="hover:text-white transition">Cookie Policy</Link>

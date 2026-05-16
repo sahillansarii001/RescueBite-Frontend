@@ -8,7 +8,7 @@ import { saveAuth, isLoggedIn } from '../../utils/auth'
 
 const empty = {
   name: '', email: '', password: '', role: 'donor',
-  donorType: 'individual', location: '', address: '', mapLink: '', phone: '', language: 'en',
+  donorType: 'individual', location: '', address: '', mapLink: '', phone: '', language: 'en', otp: ''
 }
 
 const inputCls = 'w-full bg-white border border-green-300 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
@@ -28,6 +28,17 @@ export default function SignupPage() {
   const [form, setForm] = useState(empty)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
+  const [showOtp, setShowOtp] = useState(false)
+  const [sendingOtp, setSendingOtp] = useState(false)
+  const [timer, setTimer] = useState(30)
+
+  useEffect(() => {
+    let interval;
+    if (showOtp && timer > 0) {
+      interval = setInterval(() => setTimer((t) => t - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtp, timer]);
 
   useEffect(() => {
     if (isLoggedIn()) router.replace('/dashboard')
@@ -35,18 +46,35 @@ export default function SignupPage() {
 
   const set = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
 
-  const handleSubmit = async (e) => {
+  const handleRequestOtp = async (e) => {
     e.preventDefault()
     if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return }
     if (!form.mapLink.startsWith('http')) { toast.error('Google Maps link must start with http'); return }
-    if (form.phone.replace(/\D/g, '').length < 10) { toast.error('Enter a valid phone number (min 10 digits)'); return }
+    if (form.phone.replace(/[^0-9+]/g, '').length < 10) { toast.error('Enter a valid phone number (min 10 digits)'); return }
+    
+    setSendingOtp(true)
+    try {
+      await api.post('/auth/send-otp', { email: form.email, phone: form.phone })
+      toast.success('Verification code sent!')
+      setShowOtp(true)
+      setTimer(30)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send OTP')
+    } finally {
+      setSendingOtp(false)
+    }
+  }
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    if (!form.otp) { toast.error('Please enter the 6-digit OTP'); return }
     setLoading(true)
     try {
       const payload = { ...form }
       if (form.role !== 'donor') delete payload.donorType
       const res = await api.post('/auth/register', payload)
       saveAuth(res.data.token, res.data.user, res.data.refreshToken)
-      toast.success('Account created!')
+      toast.success('Account created successfully!')
       router.push('/dashboard')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed')
@@ -98,7 +126,8 @@ export default function SignupPage() {
           <h1 className="text-2xl font-bold text-green-700 text-center mb-1">Create your account</h1>
           <p className="text-gray-400 text-sm text-center mb-8">Join the food rescue movement today</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {!showOtp ? (
+            <form onSubmit={handleRequestOtp} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field 
                 label={form.role === 'ngo' ? 'NGO Name' : form.donorType === 'restaurant' ? 'Restaurant Name' : form.donorType === 'marriage_hall' ? 'Marriage Hall Name' : form.donorType === 'hotel' ? 'Hotel Name' : form.donorType === 'other' ? 'Organization/Business Name' : 'Full Name'} 
@@ -156,13 +185,45 @@ export default function SignupPage() {
               </select>
             </Field>
 
-            <button type="submit" disabled={loading}
+            <button type="submit" disabled={sendingOtp}
               className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-60 mt-2">
-              {loading ? (
-                <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Creating account...</>
-              ) : 'Create Account'}
+              {sendingOtp ? (
+                <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Sending Code...</>
+              ) : 'Continue'}
             </button>
           </form>
+          ) : (
+            <form onSubmit={handleRegister} className="space-y-6">
+              <div className="bg-green-50 p-6 rounded-2xl border border-green-200/50 text-center">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                </div>
+                <h3 className="font-bold text-gray-800 mb-1">Verification Required</h3>
+                <p className="text-sm text-gray-500">We've sent a 6-digit code to <br/><span className="font-medium text-gray-700">{form.email}</span></p>
+              </div>
+
+              <Field label="Enter 6-digit OTP" name="otp" type="text" placeholder="------" value={form.otp} onChange={set} />
+              
+              <div className="flex justify-center -mt-2">
+                <button type="button" onClick={handleRequestOtp} disabled={timer > 0 || sendingOtp}
+                  className="text-sm font-medium text-green-700 hover:text-green-800 disabled:text-gray-400 transition-colors">
+                  {timer > 0 ? `Resend code in ${timer}s` : sendingOtp ? 'Sending...' : 'Resend Code'}
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setShowOtp(false)} className="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-lg font-semibold text-sm transition">
+                  Back
+                </button>
+                <button type="submit" disabled={loading}
+                  className="w-2/3 bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-60">
+                  {loading ? (
+                    <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Verifying...</>
+                  ) : 'Verify & Create Account'}
+                </button>
+              </div>
+            </form>
+          )}
 
           <p className="text-center text-sm mt-5 text-gray-400">
             Already have an account?{' '}

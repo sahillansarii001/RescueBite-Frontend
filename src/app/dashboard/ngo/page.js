@@ -28,6 +28,9 @@ export default function NgoDashboard() {
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [requestQuantity, setRequestQuantity] = useState('')
   const [requesting, setRequesting] = useState(false)
+  const [showImpactModal, setShowImpactModal] = useState(false)
+  const [impactForm, setImpactForm] = useState({ peopleFed: '', usedLocation: '', description: '', donationId: null })
+  const [submittingImpact, setSubmittingImpact] = useState(false)
   
   useEffect(() => {
     const saved = localStorage.getItem('ngoTab')
@@ -129,6 +132,26 @@ export default function NgoDashboard() {
     }
   }
 
+  const handleSubmitImpact = async (e) => {
+    e.preventDefault()
+    if (!impactForm.donationId || !impactForm.peopleFed || !impactForm.usedLocation) return
+    setSubmittingImpact(true)
+    try {
+      await api.put(`/donations/${impactForm.donationId}/impact`, {
+        peopleFed: impactForm.peopleFed,
+        usedLocation: impactForm.usedLocation,
+        description: impactForm.description
+      })
+      toast.success('Impact details submitted successfully!')
+      setShowImpactModal(false)
+      fetchData(userIdRef.current, true)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit impact details')
+    } finally {
+      setSubmittingImpact(false)
+    }
+  }
+
   const completed = accepted.filter(d => d.status === 'completed').length
   const inProgress = accepted.filter(d => d.status !== 'completed').length
 
@@ -150,7 +173,7 @@ export default function NgoDashboard() {
 
   return (
     <DashboardLayout user={user} navItems={navItems} activeTab={activeTab} setActiveTab={handleTabChange}
-      title={`Welcome, ${user.name}`} subtitle="NGO Dashboard">
+      title={<span className="flex items-center gap-2">Welcome, {user.name} {user.isVerified && <ShieldCheck className="w-5 h-5 text-green-500" title="Verified NGO" />}</span>} subtitle="NGO Dashboard">
 
       {/* Overview */}
       {activeTab === 'overview' && (
@@ -313,6 +336,20 @@ export default function NgoDashboard() {
                   </div>
                   <p className="text-xs font-medium text-gray-600">{d.quantity} · {d.location}</p>
                   {d.donorId?.name && <p className="text-xs text-gray-500 font-medium pt-1 border-t border-green-100/50 mt-1">Donor: {d.donorId.name}</p>}
+                  
+                  <div className="mt-3 pt-3 border-t border-green-100">
+                    {d.impactDetails?.submitted ? (
+                      <div className="bg-green-50/50 rounded-xl p-2.5 border border-green-100/50">
+                        <p className="text-[10px] font-bold text-green-700 mb-1 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Impact Recorded</p>
+                        <p className="text-xs text-gray-600 font-medium">Fed {d.impactDetails.peopleFed} people at {d.impactDetails.usedLocation}</p>
+                      </div>
+                    ) : (
+                      <button onClick={() => { setImpactForm({ peopleFed: '', usedLocation: '', description: '', donationId: d._id }); setShowImpactModal(true); }}
+                        className="w-full py-2 rounded-xl text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors flex items-center justify-center gap-1.5">
+                        <ClipboardList className="w-3.5 h-3.5" /> Add Impact Details
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -424,6 +461,58 @@ export default function NgoDashboard() {
               >
                 {requesting ? <Loader2 className="animate-spin w-4 h-4" /> : <Handshake className="w-4 h-4" />}
                 {requesting ? 'Posting...' : 'Post Food Request'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Impact Details Modal */}
+      {showImpactModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-green-900/40 backdrop-blur-sm" onClick={() => setShowImpactModal(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-8 animate-in fade-in zoom-in duration-300">
+            <button onClick={() => setShowImpactModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-all">
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-green-900 tracking-tight">Record Impact</h2>
+              <p className="text-sm font-medium text-gray-500">Share how this food helped the community.</p>
+            </div>
+
+            <form onSubmit={handleSubmitImpact} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">People Fed *</label>
+                <input
+                  type="number" min="1" placeholder="e.g. 50"
+                  value={impactForm.peopleFed} onChange={(e) => setImpactForm(p => ({ ...p, peopleFed: e.target.value }))}
+                  className="w-full bg-green-50/50 border border-green-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Location Used *</label>
+                <input
+                  type="text" placeholder="e.g. Downtown Shelter"
+                  value={impactForm.usedLocation} onChange={(e) => setImpactForm(p => ({ ...p, usedLocation: e.target.value }))}
+                  className="w-full bg-green-50/50 border border-green-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Message / Description (Optional)</label>
+                <textarea
+                  placeholder="Any additional details or thank you message..."
+                  value={impactForm.description} onChange={(e) => setImpactForm(p => ({ ...p, description: e.target.value }))}
+                  className="w-full bg-green-50/50 border border-green-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all resize-none h-24"
+                />
+              </div>
+              
+              <button type="submit" disabled={submittingImpact || !impactForm.peopleFed || !impactForm.usedLocation}
+                className="w-full mt-2 bg-green-700 hover:bg-green-800 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-50 disabled:translate-y-0">
+                {submittingImpact ? <Loader2 className="animate-spin w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                {submittingImpact ? 'Submitting...' : 'Submit Impact Details'}
               </button>
             </form>
           </div>
