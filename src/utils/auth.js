@@ -1,13 +1,17 @@
+const isBrowser = typeof window !== 'undefined'
+
 export const saveAuth = (token, user, refreshToken) => {
+  if (!isBrowser) return
   localStorage.setItem('token', token)
   if (user) localStorage.setItem('user', JSON.stringify(user))
   if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
 }
 
-export const getToken = () => localStorage.getItem('token')
-export const getRefreshToken = () => localStorage.getItem('refreshToken')
+export const getToken = () => isBrowser ? localStorage.getItem('token') : null
+export const getRefreshToken = () => isBrowser ? localStorage.getItem('refreshToken') : null
 
 export const getUser = () => {
+  if (!isBrowser) return null
   try {
     return JSON.parse(localStorage.getItem('user') || 'null')
   } catch {
@@ -16,6 +20,7 @@ export const getUser = () => {
 }
 
 export const removeAuth = () => {
+  if (!isBrowser) return
   localStorage.removeItem('token')
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('user')

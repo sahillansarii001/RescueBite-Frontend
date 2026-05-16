@@ -1,7 +1,8 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { isLoggedIn } from '../utils/auth'
+import { useRouter } from 'next/navigation'
+import { isLoggedIn, getUser } from '../utils/auth'
 import { Zap, MapPin, Building2, BarChart3, Lock, Globe2, Home, UtensilsCrossed, PartyPopper, Store, Star } from 'lucide-react'
 
 const stats = [
@@ -49,7 +50,20 @@ const awards = [
 ]
 
 export default function HomePage() {
-  useEffect(() => { isLoggedIn() }, [])
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    if (isLoggedIn()) {
+      const user = getUser()
+      if (user?.role === 'admin') router.replace('/admin')
+      else if (user?.role === 'ngo') router.replace('/dashboard/ngo')
+      else router.replace('/dashboard/donor')
+    }
+  }, [mounted, router])
 
   return (
     <main className="overflow-x-hidden bg-white">
